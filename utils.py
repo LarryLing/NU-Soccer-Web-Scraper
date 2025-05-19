@@ -2,7 +2,6 @@ import time
 import tkinter as tk
 import datetime as dt
 import pandas as pd
-import streamlit as st
 
 from io import StringIO
 from selenium import webdriver
@@ -101,7 +100,7 @@ def sanitize_html(html_str: str) -> str:
 
 def insert_html_tables(title: str, html_tables: list[str]) -> str:
     """
-    Initialize a HTML table.
+    Initializes a blank HTML page and inserts HTML table content.
 
     Args:
         title (str): Title for the HTML document.
@@ -147,7 +146,7 @@ def insert_html_tables(title: str, html_tables: list[str]) -> str:
 
 def insert_article_content(title: str, content_string: str) -> str:
     """
-    Initialize a HTML table.
+    Initializes a blank HTML page and inserts article content.
 
     Args:
         title (str): Title for the HTML document.
@@ -292,7 +291,6 @@ def get_sidearm_match_data(driver: webdriver.Chrome, team_data: dict[str, str], 
     return match_data
 
 def scan_table_for_articles(team_data: dict[str, str], table: Tag, date_range: tuple[dt.date, dt.date]) -> DataFrame:
-    team_name = team_data["name"]
     start_date = date_range[0]
     end_date = date_range[1]
 
@@ -302,20 +300,21 @@ def scan_table_for_articles(team_data: dict[str, str], table: Tag, date_range: t
 
     dataframe = pd.read_html(StringIO(sanitized_table))[0]
     dataframe = dataframe.drop(columns=["Sport", "Category"], errors="ignore")
+    dataframe.drop(dataframe.columns[dataframe.columns.str.contains('Unnamed', case=False)], axis=1, inplace=True)
     dataframe["URL"] = links
 
-    if (team_name == "Maryland") or (team_name == "Washington") or (team_name == "UIC") or (team_name == "Northern Illinois") or (team_name == "Chicago State"):
+    if ("Posted" in dataframe.columns):
         dataframe["Posted"] = pd.to_datetime(dataframe["Posted"], format='%m/%d/%Y')
-
-        for index, row in dataframe.iterrows():
-            if not (start_date <= row["Posted"].date() <= end_date):
-                dataframe.drop(index, inplace=True)
-    else:
+        dataframe.rename(columns={"Posted": "Date"}, inplace=True)
+    elif ("Date" in dataframe.columns):
         dataframe["Date"] = pd.to_datetime(dataframe["Date"], format='%B %d, %Y')
 
-        for index, row in dataframe.iterrows():
-            if not (start_date <= row["Date"].date() <= end_date):
-                dataframe.drop(index, inplace=True)
+    if ("Title" in dataframe.columns):
+        dataframe.rename(columns={"Title": "Headline"}, inplace=True)
+
+    for index, row in dataframe.iterrows():
+        if not (start_date <= row["Date"].date() <= end_date):
+            dataframe.drop(index, inplace=True)
 
     return dataframe
 

@@ -1,7 +1,7 @@
 import datetime
 import pdfkit
-import streamlit as st
 import json
+import streamlit as st
 
 from scrape import download_articles, download_box_scores, download_stats, download_tables, fetch_articles
 from utils import select_output_folder
@@ -140,8 +140,6 @@ if (scrape_button):
 
     if ("Articles" in data_to_scrape):
         articles = fetch_articles(team_data, date_range)
-
-        print(articles)
 
         @st.fragment()
         def select_articles():

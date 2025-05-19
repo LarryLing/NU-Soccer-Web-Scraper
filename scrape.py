@@ -1,9 +1,9 @@
-import datetime as dt
 import time
 import pdfkit
 import requests
 import pandas as pd
 import streamlit as st
+import datetime as dt
 
 from io import StringIO
 from utils import find_penn_state_stats_url, insert_article_content, insert_html_tables, get_boost_box_score_pdf_urls, get_sidearm_match_data, initialize_web_driver, sanitize_html, scan_table_for_articles, scan_ul_for_articles
