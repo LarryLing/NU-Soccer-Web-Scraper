@@ -2,8 +2,10 @@ import datetime
 import pdfkit
 import json
 import streamlit as st
-
-from scrape import download_articles, download_box_scores, download_stats, download_tables, fetch_articles
+from articles import download_articles, fetch_articles
+from box_scores import download_box_scores
+from stats import download_stats
+from tables import download_tables
 from utils import select_output_folder
 
 with open("teams.json", "r") as file:
@@ -21,8 +23,6 @@ team_name = st.selectbox(
 )
 
 with st.container(border=True):
-    st.write()
-
     if ("disabled" not in st.session_state):
         st.session_state.disabled = False
 
