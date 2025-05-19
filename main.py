@@ -121,6 +121,9 @@ if (scrape_button):
 
     ## TODO: Add checks for 504 Gateway timeouts.
 
+    ## TODO: Add checks for unable to write to file destination.
+
+    ## TODO: Add checks for SSL handshake error.
     if ("Roster" in data_to_scrape):
         output_file = f"{output_folder_path}\\{team_data["abbreviation"]} Roster.pdf"
         download_tables(team_data["name"], "roster", team_data["roster_url"], output_file, ignored_roster_columns, pdfkit_config)
@@ -170,7 +173,7 @@ if (scrape_button):
 
             download_articles_button = st.button("Download Selected Articles")
             if (download_articles_button):
-                download_articles(filtered_articles, output_folder_path, pdfkit_config)
+                download_articles(team_data, filtered_articles, output_folder_path, pdfkit_config)
 
         select_articles()
 

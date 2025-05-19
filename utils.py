@@ -72,24 +72,29 @@ def initialize_web_driver() -> webdriver.Chrome:
 
     return webdriver.Chrome(service=service, options=chrome_options)
 
-def sanitize_table(table_str: str) -> StringIO:
+def sanitize_html(html_str: str) -> str:
     """
-    Cleans up the table to delete filler content.
+    Removes any embedded tweets and advertisement content from HTML string.
 
     Args:
-        table_str (str): The unsanitized HTML table.
+        html_str (str): The unsanitized HTML string.
 
     Returns:
-        StringIO: The sanitized HTML table, converted into a StringIO type
+        str: The sanitized HTML table.
     """
-    table = BeautifulSoup(table_str, "lxml")
+    doc = BeautifulSoup(html_str, "lxml")
 
-    table_rows = table(["tr"])
-    for table_row in table_rows:
-        if ("skip ad" in table_row.get_text().lower()):
-            table_row.extract()
+    for tweet in doc.find_all("div", class_="twitter-tweet twitter-tweet-rendered"):
+        tweet.extract()
 
-    return StringIO(str(table))
+    tables = doc.find_all("table")
+    for table in tables:
+        table_rows = table(["tr"])
+        for table_row in table_rows:
+            if ("skip ad" in table_row.get_text().lower()):
+                table_row.extract()
+
+    return str(doc)
 
 def insert_html_tables(title: str, html_tables: list[str]) -> str:
     """

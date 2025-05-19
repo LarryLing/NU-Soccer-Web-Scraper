@@ -1,11 +1,11 @@
-import base64
 import time
 import pdfkit
 import requests
 import pandas as pd
 import streamlit as st
 
-from utils import find_penn_state_stats_url, insert_article_content, insert_html_tables, get_boost_box_score_pdf_urls, get_sidearm_match_data, initialize_web_driver, sanitize_table
+from io import StringIO
+from utils import find_penn_state_stats_url, insert_article_content, insert_html_tables, get_boost_box_score_pdf_urls, get_sidearm_match_data, initialize_web_driver, sanitize_html
 from bs4 import BeautifulSoup
 from datetime import date
 from pdfkit.configuration import Configuration
@@ -41,8 +41,8 @@ def download_tables(team_name: str, type: str, url: str, output_file_path: str, 
         if (not table.find("thead")):
             continue
 
-        sanitized_table = sanitize_table(str(table))
-        extracted_tables.append(sanitized_table)
+        sanitized_table = sanitize_html(str(table))
+        extracted_tables.append(StringIO(sanitized_table))
 
     html_tables = []
     for extracted_table in extracted_tables:
@@ -168,10 +168,10 @@ def fetch_articles(team_data: dict[str, str], date_range: tuple[date, date]) -> 
     Returns:
         DataFrame: Dataframe of articles to download containing the date posted, headline, and URL.
     """
+    st.write(f"Fetching {team_data["name"]}'s articles...")
+
     start_date = date_range[0]
     end_date = date_range[1]
-
-    st.write(f"Fetching {team_data["name"]}'s articles...")
 
     driver = initialize_web_driver()
     driver.get(team_data["articles_url"])
@@ -184,38 +184,40 @@ def fetch_articles(team_data: dict[str, str], date_range: tuple[date, date]) -> 
 
     team_name = team_data["name"]
     if (team_name == "Rutgers") or (team_name == "Wisconsin") or (team_name == "Loyola Chicago"):
-        pass
+        return
+
+    table = doc.find("table")
+    sanitized_table = sanitize_html(str(table))
+
+    links = [f"https://{team_data["hostname"]}{a["href"]}" for a in table.find_all("a") if (a["href"] != "#")]
+
+    dataframe = pd.read_html(StringIO(sanitized_table))[0]
+    dataframe = dataframe.drop(columns=["Sport", "Category"], errors="ignore")
+    dataframe["URL"] = links
+
+    if (team_name == "Maryland") or (team_name == "Washington") or (team_name == "UIC") or (team_name == "Northern Illinois") or (team_name == "Chicago State"):
+        dataframe["Posted"] = pd.to_datetime(dataframe["Posted"], format='%m/%d/%y')
+
+        for index, row in dataframe.iterrows():
+            if not (start_date <= row["Posted"].date() <= end_date):
+                dataframe.drop(index, inplace=True)
     else:
-        table = doc.find("table")
-        sanitized_table = sanitize_table(str(table))
+        dataframe["Date"] = pd.to_datetime(dataframe["Date"], format='%B %d, %Y')
 
-        links = [f"https://{team_data["hostname"]}{a["href"]}" for a in table.find_all("a") if (a["href"] != "#")]
-
-        dataframe = pd.read_html(sanitized_table)[0]
-        dataframe = dataframe.drop(columns=["Sport", "Category"], errors="ignore")
-        dataframe["URL"] = links
-
-        if (team_name == "Maryland") or (team_name == "Washington") or (team_name == "UIC") or (team_name == "Northern Illinois") or (team_name == "Chicago State"):
-            dataframe["Posted"] = pd.to_datetime(dataframe["Posted"], format='%m/%d/%y')
-
-            for index, row in dataframe.iterrows():
-                if not (start_date <= row["Posted"].date() <= end_date):
-                    dataframe.drop(index, inplace=True)
-        else:
-            dataframe["Date"] = pd.to_datetime(dataframe["Date"], format='%B %d, %Y')
-
-            for index, row in dataframe.iterrows():
-                if not (start_date <= row["Date"].date() <= end_date):
-                    dataframe.drop(index, inplace=True)
+        for index, row in dataframe.iterrows():
+            if not (start_date <= row["Date"].date() <= end_date):
+                dataframe.drop(index, inplace=True)
 
     st.write(f"Finished fetching {team_data["name"]}'s articles!")
     return dataframe
 
-def download_articles(articles: DataFrame, output_folder_path: str, pdfkit_config: Configuration) -> None:
+def download_articles(team_data: dict[str, str], articles: DataFrame, output_folder_path: str, pdfkit_config: Configuration) -> None:
     """
-    Downloads selected articles into respective PDF files.
+    Downloads selected articles into respective PDF files. Article's who's URLs link to a website that does not share
+    the same hostname will be printed out as a Streamlit Dataframe instance.
 
     Args:
+        team_data (dict[str, str]): Dictionary containing team data.
         articles (DataFrame): Dataframe of articles to download containing the date posted, headline, and URL.
         output_folder_path (str): Path to the output folder.
         pdfkit_config: (Configuration): Configuration object for pdfkit.
@@ -227,26 +229,45 @@ def download_articles(articles: DataFrame, output_folder_path: str, pdfkit_confi
 
     driver = initialize_web_driver()
 
+    undownloaded_articles = articles.iloc[0:0].copy()
     for _, row in articles.iterrows():
         driver.get(row["URL"])
         time.sleep(1)
 
+        if (team_data["hostname"] not in driver.current_url):
+            undownloaded_articles.loc[len(undownloaded_articles)] = row
+            continue
+
         doc = BeautifulSoup(driver.page_source, "lxml")
 
-        ## TODO: Refactor sanitize_table function to sanitize all HTML tags
         content = doc.find("div", id="storyPageContentBody")
-        for tweet in content.find_all("div", class_="twitter-tweet twitter-tweet-rendered"):
-            tweet.extract()
+        content = sanitize_html(str(content))
 
-        for skip_ad in content.find_all(string="Skip Ad"):
-            skip_ad.extract()
-
-        full_html = insert_article_content(row["Headline"], str(content))
+        full_html = insert_article_content(row["Headline"], content)
 
         output_file_path = f"{output_folder_path}\\{row["Headline"]}.pdf"
         pdfkit.from_string(full_html, output_file_path, configuration=pdfkit_config)
 
     driver.quit()
 
-    st.write(f"Finished downloading selected articles!")
+    if (len(undownloaded_articles) != 0):
+        column_configuration = {
+            "Date": None,
+            "Posted": None,
+            "Headline": st.column_config.TextColumn(
+                width="medium"
+            ),
+            "URL": st.column_config.LinkColumn(
+                width="medium"
+            )
+        }
 
+        st.write("We could not download the following articles. Please navigate to the URL and download them manually.")
+
+        st.dataframe(
+            data=undownloaded_articles,
+            hide_index=True,
+            column_config=column_configuration
+        )
+
+    st.write(f"Finished downloading selected articles!")
