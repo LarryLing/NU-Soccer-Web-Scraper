@@ -317,7 +317,6 @@ def scan_table_for_articles(team_data: dict[str, str], table: Tag, date_range: t
             if not (start_date <= row["Date"].date() <= end_date):
                 dataframe.drop(index, inplace=True)
 
-    st.write(f"Finished fetching {team_data["name"]}'s articles!")
     return dataframe
 
 def scan_ul_for_articles(team_data: dict[str, str], ul: Tag, date_range: tuple[dt.date, dt.date]) -> DataFrame:
@@ -347,5 +346,4 @@ def scan_ul_for_articles(team_data: dict[str, str], ul: Tag, date_range: tuple[d
         url = f"https://{team_data["hostname"]}{a["href"]}"
         dataframe.loc[len(dataframe)] = [date, headline, url]
 
-    st.write(f"Finished fetching {team_data["name"]}'s articles!")
     return dataframe

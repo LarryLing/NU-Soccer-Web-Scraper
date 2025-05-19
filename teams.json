@@ -9,6 +9,7 @@
         "conference_schedule_provider": "Boost",
         "conference_base_url": "https://bigten.org",
         "conference_schedule_url": "https://bigten.org/msoc/schedule/?teamFilter=NU",
+        "article_display_type": "table",
         "articles_url": "https://nusports.com/sports/mens-soccer/archives"
     },
     "Indiana": {
@@ -21,6 +22,7 @@
         "conference_schedule_provider": "Boost",
         "conference_base_url": "https://bigten.org",
         "conference_schedule_url": "https://bigten.org/msoc/schedule/?teamFilter=IND",
+        "article_display_type": "table",
         "articles_url": "https://iuhoosiers.com/sports/mens-soccer/archives"
     },
     "Ohio State": {
@@ -33,6 +35,7 @@
         "conference_schedule_provider": "Boost",
         "conference_base_url": "https://bigten.org",
         "conference_schedule_url": "https://bigten.org/msoc/schedule/?teamFilter=OSU",
+        "article_display_type": "table",
         "articles_url": "https://ohiostatebuckeyes.com/archives?path=msoc"
     },
     "Maryland": {
@@ -45,6 +48,7 @@
         "conference_schedule_provider": "Boost",
         "conference_base_url": "https://bigten.org",
         "conference_schedule_url": "https://bigten.org/msoc/schedule/?teamFilter=MD",
+        "article_display_type": "table",
         "articles_url": "https://umterps.com/sports/mens-soccer/archives"
     },
     "Washington": {
@@ -57,6 +61,7 @@
         "conference_schedule_provider": "Boost",
         "conference_base_url": "https://bigten.org",
         "conference_schedule_url": "https://bigten.org/msoc/schedule/?teamFilter=WASH",
+        "article_display_type": "table",
         "articles_url": "https://gohuskies.com/sports/mens-soccer/archives"
     },
     "UCLA": {
@@ -69,6 +74,7 @@
         "conference_schedule_provider": "Boost",
         "conference_base_url": "https://bigten.org",
         "conference_schedule_url": "https://bigten.org/msoc/schedule/?teamFilter=UCLA",
+        "article_display_type": "table",
         "articles_url": "https://uclabruins.com/sports/mens-soccer/archives"
     },
     "Michigan State": {
@@ -81,6 +87,7 @@
         "conference_schedule_provider": "Boost",
         "conference_base_url": "https://bigten.org",
         "conference_schedule_url": "https://bigten.org/msoc/schedule/?teamFilter=MSU",
+        "article_display_type": "table",
         "articles_url": "https://msuspartans.com/sports/mens-soccer/archives"
     },
     "Michigan": {
@@ -93,6 +100,7 @@
         "conference_schedule_provider": "Boost",
         "conference_base_url": "https://bigten.org",
         "conference_schedule_url": "https://bigten.org/msoc/schedule/?teamFilter=MICH",
+        "article_display_type": "table",
         "articles_url": "https://mgoblue.com/sports/mens-soccer/archives"
     },
     "Rutgers": {
@@ -105,6 +113,7 @@
         "conference_schedule_provider": "Boost",
         "conference_base_url": "https://bigten.org",
         "conference_schedule_url": "https://bigten.org/msoc/schedule/?teamFilter=RU",
+        "article_display_type": "list",
         "articles_url": "https://scarletknights.com/sports/mens-soccer/archives?search=&sport=msoc&season=0"
     },
     "Wisconsin": {
@@ -117,6 +126,7 @@
         "conference_schedule_provider": "Boost",
         "conference_base_url": "https://bigten.org",
         "conference_schedule_url": "https://bigten.org/msoc/schedule/?teamFilter=WIS",
+        "article_display_type": "list",
         "articles_url": "https://uwbadgers.com/sports/mens-soccer/archives?search=&sport=msoc&season=0"
     },
     "Penn State": {
@@ -129,6 +139,7 @@
         "conference_schedule_provider": "Boost",
         "conference_base_url": "https://bigten.org",
         "conference_schedule_url": "https://bigten.org/msoc/schedule/?teamFilter=PSU",
+        "article_display_type": "table",
         "articles_url": "https://gopsusports.com/sports/mens-soccer/news?view=list"
     },
     "UIC": {
@@ -141,6 +152,7 @@
         "conference_schedule_provider": "Sidearm",
         "conference_base_url": "https://mvc-sports.com",
         "conference_schedule_url": "https://mvc-sports.com/calendar.aspx?path=msoc",
+        "article_display_type": "table",
         "articles_url": "https://uicflames.com/sports/mens-soccer/archives"
     },
     "Loyola Chicago": {
@@ -153,6 +165,7 @@
         "conference_schedule_provider": "Sidearm",
         "conference_base_url": "https://atlantic10.com",
         "conference_schedule_url": "https://atlantic10.com/calendar.aspx?path=msoc",
+        "article_display_type": "list",
         "articles_url": "https://loyolaramblers.com/sports/mens-soccer/archives"
     },
     "DePaul": {
@@ -165,6 +178,7 @@
         "conference_schedule_provider": "Sidearm",
         "conference_base_url": "https://www.bigeast.com",
         "conference_schedule_url": "https://www.bigeast.com/calendar.aspx?path=msoc",
+        "article_display_type": "table",
         "articles_url": "https://depaulbluedemons.com/sports/mens-soccer/archives"
     },
     "Northern Illinois": {
@@ -177,6 +191,7 @@
         "conference_schedule_provider": "Sidearm",
         "conference_base_url": "https://mvc-sports.com",
         "conference_schedule_url": "https://mvc-sports.com/calendar.aspx?path=msoc",
+        "article_display_type": "table",
         "articles_url": "https://niuhuskies.com/sports/mens-soccer/archives"
     },
     "Chicago State": {
@@ -189,6 +204,7 @@
         "conference_schedule_provider": "Sidearm",
         "conference_base_url": "https://northeastconference.org",
         "conference_schedule_url": "https://northeastconference.org/calendar.aspx?path=msoc",
+        "article_display_type": "list",
         "articles_url": "https://www.gocsucougars.com/sports/mens-soccer/archives?sport=msoc"
     }
 }

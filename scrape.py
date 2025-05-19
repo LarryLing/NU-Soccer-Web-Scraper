@@ -179,14 +179,15 @@ def fetch_articles(team_data: dict[str, str], date_range: tuple[dt.date, dt.date
 
     driver.quit()
 
-    table = doc.find("table")
-    div = doc.find("div", class_="vue-archives-stories")
-    if (table):
-        return scan_table_for_articles(team_data, table, date_range)
-    elif (div):
-        return scan_ul_for_articles(team_data, div.find("ul"), date_range)
-    else:
-        st.write(f"Could not find {team_data["name"]}'s articles...")
+    if (team_data["article_display_type"] == "table"):
+        table = doc.find("table")
+        dataframe = scan_table_for_articles(team_data, table, date_range)
+    elif (team_data["article_display_type"] == "list"):
+        ul = doc.find("div", class_="vue-archives-stories").find("ul")
+        dataframe = scan_ul_for_articles(team_data, ul, date_range)
+
+    st.write(f"Finished fetching {team_data["name"]}'s articles!")
+    return dataframe
 
 def download_articles(team_data: dict[str, str], articles: DataFrame, output_folder_path: str, pdfkit_config: Configuration) -> None:
     """
