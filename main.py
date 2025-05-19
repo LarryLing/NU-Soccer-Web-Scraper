@@ -1,9 +1,9 @@
-import asyncio
+import datetime
 import pdfkit
 import streamlit as st
 import json
 
-from scrape import download_box_scores, download_stats, download_tables
+from scrape import download_articles, download_box_scores, download_stats, download_tables, fetch_articles
 from utils import select_output_folder
 
 with open("teams.json", "r") as file:
@@ -28,7 +28,7 @@ with st.container(border=True):
 
     selected_data = st.segmented_control(
         label="Select the data you want to download:",
-        options=["Roster", "Schedule", "Stats", "Box Scores", "Related Articles"],
+        options=["Roster", "Schedule", "Stats", "Box Scores", "Articles"],
         selection_mode="multi",
         disabled=st.session_state.disabled
     )
@@ -38,7 +38,7 @@ with st.container(border=True):
         key="disabled"
     )
 
-data_to_scrape = ["Roster", "Schedule", "Stats", "Box Scores", "Related Articles"] if (select_all) else selected_data
+data_to_scrape = ["Roster", "Schedule", "Stats", "Box Scores", "Articles"] if (select_all) else selected_data
 
 if ("Roster" in data_to_scrape):
     with st.container(border=True):
@@ -86,6 +86,18 @@ if ("Box Scores" in data_to_scrape):
         with st.expander("**Disclaimer**"):
             st.warning("Box scores are downloaded in order from most newest to oldest. If there are not enough box scores available, we will attempt to download as many as possible.")
 
+if ("Articles" in data_to_scrape):
+    with st.container(border=True):
+        now = datetime.datetime.now()
+        season_start = datetime.date(2025, 8, 21)
+        today = datetime.date(now.year, now.month, now.day)
+
+        date_range = st.date_input(
+            label="Enter the range of dates you would like to see articles:",
+            value=(today, season_start),
+            format="MM/DD/YYYY",
+        )
+
 with st.container(border=True):
     output_folder_path: str | None = st.session_state.get("output_folder_path", None)
     folder_select_button = st.button("Select Output Folder")
@@ -107,6 +119,8 @@ scrape_button = st.button(
 if (scrape_button):
     team_data = teams.get(team_name, None)
 
+    ## TODO: Add checks for 504 Gateway timeouts.
+
     if ("Roster" in data_to_scrape):
         output_file = f"{output_folder_path}\\{team_data["abbreviation"]} Roster.pdf"
         download_tables(team_data["name"], "roster", team_data["roster_url"], output_file, ignored_roster_columns, pdfkit_config)
@@ -120,5 +134,44 @@ if (scrape_button):
 
     if ("Stats" in data_to_scrape):
         download_stats(team_data, years, output_folder_path)
+
+    if ("Articles" in data_to_scrape):
+        articles = fetch_articles(team_data, date_range)
+
+        @st.fragment()
+        def select_articles():
+            column_configuration = {
+                "Date": st.column_config.DatetimeColumn(
+                    width="small",
+                    format="MM/DD/YYYY"
+                ),
+                "Posted": st.column_config.DatetimeColumn(
+                    width="small",
+                    format="MM/DD/YYYY"
+                ),
+                "Headline": st.column_config.TextColumn(
+                    width="large"
+                ),
+                "URL": None
+            }
+
+            st.write("Select which articles you would like to download:")
+
+            all_articles = st.dataframe(
+                data=articles,
+                hide_index=True,
+                on_select="rerun",
+                selection_mode="multi-row",
+                column_config=column_configuration
+            )
+
+            article_indexes = all_articles.selection.rows
+            filtered_articles = articles.iloc[article_indexes]
+
+            download_articles_button = st.button("Download Selected Articles")
+            if (download_articles_button):
+                download_articles(filtered_articles, output_folder_path, pdfkit_config)
+
+        select_articles()
 
     st.write("All files have been downloaded!")

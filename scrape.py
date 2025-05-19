@@ -1,23 +1,27 @@
+import base64
 import time
 import pdfkit
 import requests
 import pandas as pd
 import streamlit as st
 
-from utils import find_penn_state_stats_url, insert_html_tables, get_boost_box_score_pdf_urls, get_sidearm_match_data, initialize_web_driver, sanitize_table
+from utils import find_penn_state_stats_url, insert_article_content, insert_html_tables, get_boost_box_score_pdf_urls, get_sidearm_match_data, initialize_web_driver, sanitize_table
 from bs4 import BeautifulSoup
+from datetime import date
 from pdfkit.configuration import Configuration
+from pandas import DataFrame
 
 def download_tables(team_name: str, type: str, url: str, output_file_path: str, ignored_columns: list[str], pdfkit_config: Configuration) -> None:
     """
-    Download the roster page to a PDF file.
+    Downloads the roster page to a PDF file.
 
     Args:
         team_name (str): Name of the team.
         type (str): Type of table(s) to download. Either "roster" or "schedule".
         url (str): URL of the site.
         output_file_path (str): Path to the downloaded PDF file.
-        ignored_columns: (list[str]): List of columns to ignore.
+        ignored_columns (list[str]): List of columns to ignore.
+        pdfkit_config: (Configuration): Configuration object for pdfkit.
 
     Returns:
         None
@@ -56,7 +60,7 @@ def download_tables(team_name: str, type: str, url: str, output_file_path: str, 
 
 def download_stats(team_data: dict[str, str], years: list[int], output_folder_path: str) -> None:
     """
-    Print a team's season stats to a PDF file.
+    Downloads a team's season stats to a PDF file.
 
     Args:
         team_data (dict[str, str]): Dictionary containing team data.
@@ -107,7 +111,7 @@ def download_stats(team_data: dict[str, str], years: list[int], output_folder_pa
 
 def download_box_scores(team_data: dict[str, str], count: int, output_folder_path: str) -> None:
     """
-    Print box scores into respective PDF files.
+    Downloads box scores into respective PDF files.
 
     Args:
         team_data (dict[str, str]): Dictionary containing team data.
@@ -124,7 +128,7 @@ def download_box_scores(team_data: dict[str, str], count: int, output_folder_pat
 
     time.sleep(1)
 
-    doc = BeautifulSoup(driver.page_source, "html.parser")
+    doc = BeautifulSoup(driver.page_source, "lxml")
 
     if (team_data["conference_schedule_provider"] == "Boost"):
         box_score_pdf_urls = get_boost_box_score_pdf_urls(doc, count)
@@ -152,3 +156,97 @@ def download_box_scores(team_data: dict[str, str], count: int, output_folder_pat
     driver.quit()
 
     st.write(f"Finished downloading {team_data["name"]}'s box scores!")
+
+def fetch_articles(team_data: dict[str, str], date_range: tuple[date, date]) -> DataFrame:
+    """
+    Fetches a team's articles, returnin their headlines and URLs.
+
+    Args:
+        team_data (dict[str, str]): Dictionary containing team data.
+        date_range (tuple[date, date]): Range of dates to fetch articles from.
+
+    Returns:
+        DataFrame: Dataframe of articles to download containing the date posted, headline, and URL.
+    """
+    start_date = date_range[0]
+    end_date = date_range[1]
+
+    st.write(f"Fetching {team_data["name"]}'s articles...")
+
+    driver = initialize_web_driver()
+    driver.get(team_data["articles_url"])
+
+    time.sleep(1)
+
+    doc = BeautifulSoup(driver.page_source, "lxml")
+
+    driver.quit()
+
+    team_name = team_data["name"]
+    if (team_name == "Rutgers") or (team_name == "Wisconsin") or (team_name == "Loyola Chicago"):
+        pass
+    else:
+        table = doc.find("table")
+        sanitized_table = sanitize_table(str(table))
+
+        links = [f"https://{team_data["hostname"]}{a["href"]}" for a in table.find_all("a") if (a["href"] != "#")]
+
+        dataframe = pd.read_html(sanitized_table)[0]
+        dataframe = dataframe.drop(columns=["Sport", "Category"], errors="ignore")
+        dataframe["URL"] = links
+
+        if (team_name == "Maryland") or (team_name == "Washington") or (team_name == "UIC") or (team_name == "Northern Illinois") or (team_name == "Chicago State"):
+            dataframe["Posted"] = pd.to_datetime(dataframe["Posted"], format='%m/%d/%y')
+
+            for index, row in dataframe.iterrows():
+                if not (start_date <= row["Posted"].date() <= end_date):
+                    dataframe.drop(index, inplace=True)
+        else:
+            dataframe["Date"] = pd.to_datetime(dataframe["Date"], format='%B %d, %Y')
+
+            for index, row in dataframe.iterrows():
+                if not (start_date <= row["Date"].date() <= end_date):
+                    dataframe.drop(index, inplace=True)
+
+    st.write(f"Finished fetching {team_data["name"]}'s articles!")
+    return dataframe
+
+def download_articles(articles: DataFrame, output_folder_path: str, pdfkit_config: Configuration) -> None:
+    """
+    Downloads selected articles into respective PDF files.
+
+    Args:
+        articles (DataFrame): Dataframe of articles to download containing the date posted, headline, and URL.
+        output_folder_path (str): Path to the output folder.
+        pdfkit_config: (Configuration): Configuration object for pdfkit.
+
+    Returns:
+        None
+    """
+    st.write(f"Downloading selected articles...")
+
+    driver = initialize_web_driver()
+
+    for _, row in articles.iterrows():
+        driver.get(row["URL"])
+        time.sleep(1)
+
+        doc = BeautifulSoup(driver.page_source, "lxml")
+
+        ## TODO: Refactor sanitize_table function to sanitize all HTML tags
+        content = doc.find("div", id="storyPageContentBody")
+        for tweet in content.find_all("div", class_="twitter-tweet twitter-tweet-rendered"):
+            tweet.extract()
+
+        for skip_ad in content.find_all(string="Skip Ad"):
+            skip_ad.extract()
+
+        full_html = insert_article_content(row["Headline"], str(content))
+
+        output_file_path = f"{output_folder_path}\\{row["Headline"]}.pdf"
+        pdfkit.from_string(full_html, output_file_path, configuration=pdfkit_config)
+
+    driver.quit()
+
+    st.write(f"Finished downloading selected articles!")
+

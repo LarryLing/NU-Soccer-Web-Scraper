@@ -68,20 +68,21 @@ def initialize_web_driver() -> webdriver.Chrome:
     chrome_options = ChromiumOptions()
     chrome_options.add_argument("--headless")
     chrome_options.add_argument("--log-level=3")
+    chrome_options.add_argument('--kiosk-printing')
 
     return webdriver.Chrome(service=service, options=chrome_options)
 
-def sanitize_table(table: str) -> StringIO:
+def sanitize_table(table_str: str) -> StringIO:
     """
     Cleans up the table to delete filler content.
 
     Args:
-        table (str): The unsanitized HTML table.
+        table_str (str): The unsanitized HTML table.
 
     Returns:
         StringIO: The sanitized HTML table, converted into a StringIO type
     """
-    table = BeautifulSoup(table, "lxml")
+    table = BeautifulSoup(table_str, "lxml")
 
     table_rows = table(["tr"])
     for table_row in table_rows:
@@ -133,6 +134,42 @@ def insert_html_tables(title: str, html_tables: list[str]) -> str:
 
         table = BeautifulSoup(html_table, "lxml")
         main.append(table)
+
+    return str(doc)
+
+def insert_article_content(title: str, content_string: str) -> str:
+    """
+    Initialize a HTML table.
+
+    Args:
+        title (str): Title for the HTML document.
+        content_string (list[str]): HTML string containing the article content.
+
+    Returns:
+        str: A string representation of the full .HTML document.
+    """
+
+    html = f"""
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>{title}</title>
+    </head>
+    <body>
+        <main>
+            <h1>{title}</h1>
+        </main>
+    </body>
+    </html>
+    """
+    doc = BeautifulSoup(html, "lxml")
+
+    main = doc.find("main")
+
+    content = BeautifulSoup(content_string, "lxml")
+    main.append(content)
 
     return str(doc)
 
