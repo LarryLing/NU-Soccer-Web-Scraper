@@ -141,6 +141,8 @@ if (scrape_button):
     if ("Articles" in data_to_scrape):
         articles = fetch_articles(team_data, date_range)
 
+        print(articles)
+
         @st.fragment()
         def select_articles():
             column_configuration = {

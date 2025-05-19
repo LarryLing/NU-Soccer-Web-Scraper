@@ -1,12 +1,16 @@
-from io import StringIO
 import time
 import tkinter as tk
+import datetime as dt
+import pandas as pd
+import streamlit as st
 
+from io import StringIO
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.chrome.options import ChromiumOptions
-from bs4 import BeautifulSoup
+from bs4 import BeautifulSoup, Tag
 from tkinter import filedialog
+from pandas import DataFrame
 
 def prompt(teams: dict[str, dict[str, any]]) -> str:
     """
@@ -68,7 +72,6 @@ def initialize_web_driver() -> webdriver.Chrome:
     chrome_options = ChromiumOptions()
     chrome_options.add_argument("--headless")
     chrome_options.add_argument("--log-level=3")
-    chrome_options.add_argument('--kiosk-printing')
 
     return webdriver.Chrome(service=service, options=chrome_options)
 
@@ -287,3 +290,62 @@ def get_sidearm_match_data(driver: webdriver.Chrome, team_data: dict[str, str], 
         match_data.append((match[0], match[1], match[2], box_score_pdf_url))
 
     return match_data
+
+def scan_table_for_articles(team_data: dict[str, str], table: Tag, date_range: tuple[dt.date, dt.date]) -> DataFrame:
+    team_name = team_data["name"]
+    start_date = date_range[0]
+    end_date = date_range[1]
+
+    sanitized_table = sanitize_html(str(table))
+
+    links = [f"https://{team_data["hostname"]}{a["href"]}" for a in table.find_all("a") if (a["href"] != "#")]
+
+    dataframe = pd.read_html(StringIO(sanitized_table))[0]
+    dataframe = dataframe.drop(columns=["Sport", "Category"], errors="ignore")
+    dataframe["URL"] = links
+
+    if (team_name == "Maryland") or (team_name == "Washington") or (team_name == "UIC") or (team_name == "Northern Illinois") or (team_name == "Chicago State"):
+        dataframe["Posted"] = pd.to_datetime(dataframe["Posted"], format='%m/%d/%Y')
+
+        for index, row in dataframe.iterrows():
+            if not (start_date <= row["Posted"].date() <= end_date):
+                dataframe.drop(index, inplace=True)
+    else:
+        dataframe["Date"] = pd.to_datetime(dataframe["Date"], format='%B %d, %Y')
+
+        for index, row in dataframe.iterrows():
+            if not (start_date <= row["Date"].date() <= end_date):
+                dataframe.drop(index, inplace=True)
+
+    st.write(f"Finished fetching {team_data["name"]}'s articles!")
+    return dataframe
+
+def scan_ul_for_articles(team_data: dict[str, str], ul: Tag, date_range: tuple[dt.date, dt.date]) -> DataFrame:
+    start_date = date_range[0]
+    end_date = date_range[1]
+
+    sanitized_ul = sanitize_html(str(ul))
+    sanitized_ul = BeautifulSoup(sanitized_ul, "lxml")
+
+    dataframe = DataFrame(columns=["Date", "Headline", "URL"])
+
+    for li in sanitized_ul.find_all("li", class_="vue-archives-item flex"):
+        date_string = li.find("span").text
+        if ("Date: " in date_string):
+            date_string = date_string.replace("Date: ", "")
+
+        date = dt.datetime.strptime(date_string, '%B %d, %Y').date()
+
+        if not (start_date <= date):
+            continue
+
+        if not (date <= end_date):
+            break
+
+        a = li.find("a")
+        headline = a.text
+        url = f"https://{team_data["hostname"]}{a["href"]}"
+        dataframe.loc[len(dataframe)] = [date, headline, url]
+
+    st.write(f"Finished fetching {team_data["name"]}'s articles!")
+    return dataframe

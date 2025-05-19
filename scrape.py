@@ -1,3 +1,4 @@
+import datetime as dt
 import time
 import pdfkit
 import requests
@@ -5,9 +6,8 @@ import pandas as pd
 import streamlit as st
 
 from io import StringIO
-from utils import find_penn_state_stats_url, insert_article_content, insert_html_tables, get_boost_box_score_pdf_urls, get_sidearm_match_data, initialize_web_driver, sanitize_html
+from utils import find_penn_state_stats_url, insert_article_content, insert_html_tables, get_boost_box_score_pdf_urls, get_sidearm_match_data, initialize_web_driver, sanitize_html, scan_table_for_articles, scan_ul_for_articles
 from bs4 import BeautifulSoup
-from datetime import date
 from pdfkit.configuration import Configuration
 from pandas import DataFrame
 
@@ -157,7 +157,7 @@ def download_box_scores(team_data: dict[str, str], count: int, output_folder_pat
 
     st.write(f"Finished downloading {team_data["name"]}'s box scores!")
 
-def fetch_articles(team_data: dict[str, str], date_range: tuple[date, date]) -> DataFrame:
+def fetch_articles(team_data: dict[str, str], date_range: tuple[dt.date, dt.date]) -> DataFrame:
     """
     Fetches a team's articles, returnin their headlines and URLs.
 
@@ -170,9 +170,6 @@ def fetch_articles(team_data: dict[str, str], date_range: tuple[date, date]) -> 
     """
     st.write(f"Fetching {team_data["name"]}'s articles...")
 
-    start_date = date_range[0]
-    end_date = date_range[1]
-
     driver = initialize_web_driver()
     driver.get(team_data["articles_url"])
 
@@ -182,34 +179,14 @@ def fetch_articles(team_data: dict[str, str], date_range: tuple[date, date]) -> 
 
     driver.quit()
 
-    team_name = team_data["name"]
-    if (team_name == "Rutgers") or (team_name == "Wisconsin") or (team_name == "Loyola Chicago"):
-        return
-
     table = doc.find("table")
-    sanitized_table = sanitize_html(str(table))
-
-    links = [f"https://{team_data["hostname"]}{a["href"]}" for a in table.find_all("a") if (a["href"] != "#")]
-
-    dataframe = pd.read_html(StringIO(sanitized_table))[0]
-    dataframe = dataframe.drop(columns=["Sport", "Category"], errors="ignore")
-    dataframe["URL"] = links
-
-    if (team_name == "Maryland") or (team_name == "Washington") or (team_name == "UIC") or (team_name == "Northern Illinois") or (team_name == "Chicago State"):
-        dataframe["Posted"] = pd.to_datetime(dataframe["Posted"], format='%m/%d/%y')
-
-        for index, row in dataframe.iterrows():
-            if not (start_date <= row["Posted"].date() <= end_date):
-                dataframe.drop(index, inplace=True)
+    div = doc.find("div", class_="vue-archives-stories")
+    if (table):
+        return scan_table_for_articles(team_data, table, date_range)
+    elif (div):
+        return scan_ul_for_articles(team_data, div.find("ul"), date_range)
     else:
-        dataframe["Date"] = pd.to_datetime(dataframe["Date"], format='%B %d, %Y')
-
-        for index, row in dataframe.iterrows():
-            if not (start_date <= row["Date"].date() <= end_date):
-                dataframe.drop(index, inplace=True)
-
-    st.write(f"Finished fetching {team_data["name"]}'s articles!")
-    return dataframe
+        st.write(f"Could not find {team_data["name"]}'s articles...")
 
 def download_articles(team_data: dict[str, str], articles: DataFrame, output_folder_path: str, pdfkit_config: Configuration) -> None:
     """
