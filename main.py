@@ -4,14 +4,16 @@ import json
 import streamlit as st
 from articles import download_articles, fetch_articles
 from box_scores import download_box_scores
+from roster import download_roster
+from schedule import download_schedule
 from stats import download_stats
 from tables import download_tables
 from utils import select_output_folder
 
 with open("teams.json", "r") as file:
-    teams: dict[str, any] = json.load(file)
+    teams: dict[str, dict[str, str]] = json.load(file)
 
-pdfkit_config = pdfkit.configuration(wkhtmltopdf="wkhtmltopdf\\bin\\wkhtmltopdf.exe")
+# pdfkit_config = pdfkit.configuration(wkhtmltopdf=".\\wkhtmltopdf\\bin\\wkhtmltopdf.exe")
 
 st.title = "NU Soccer Web Scraper"
 
@@ -23,7 +25,7 @@ team_name = st.selectbox(
 )
 
 with st.container(border=True):
-    if ("disabled" not in st.session_state):
+    if "disabled" not in st.session_state:
         st.session_state.disabled = False
 
     selected_data = st.segmented_control(
@@ -38,29 +40,9 @@ with st.container(border=True):
         key="disabled"
     )
 
-data_to_scrape = ["Roster", "Schedule", "Stats", "Box Scores", "Articles"] if (select_all) else selected_data
+data_to_scrape = ["Roster", "Schedule", "Stats", "Box Scores", "Articles"] if select_all else selected_data
 
-if ("Roster" in data_to_scrape):
-    with st.container(border=True):
-        ignored_roster_columns = st.multiselect(
-            label="Select the roster columns that you would like to ignore:",
-            options=["Image", "Twitter", "Instagram", "Major"],
-            default=["Image", "Twitter", "Instagram", "Major"],
-            accept_new_options=True,
-            placeholder="ie: Twitter"
-        )
-
-if ("Schedule" in data_to_scrape):
-    with st.container(border=True):
-        ignored_schedule_columns = st.multiselect(
-            label="Select the schedule columns that you would like to ignore:",
-            options=["Links"],
-            default=["Links"],
-            accept_new_options=True,
-            placeholder="ie: Links"
-        )
-
-if ("Stats" in data_to_scrape):
+if "Stats" in data_to_scrape:
     with st.container(border=True):
         years = st.multiselect(
             label="Select which year's stats you would like to download:",
@@ -72,7 +54,7 @@ if ("Stats" in data_to_scrape):
         with st.expander("**Disclaimer**"):
             st.warning("Options for years will be added at the start of every calendar year. However, please be aware that depending on the time of current season, there might not be stats available to download yet.")
 
-if ("Box Scores" in data_to_scrape):
+if "Box Scores" in data_to_scrape:
     with st.container(border=True):
         count = st.number_input(
             label="Enter the number of box scores you would like download (1-10):",
@@ -84,9 +66,9 @@ if ("Box Scores" in data_to_scrape):
         )
 
         with st.expander("**Disclaimer**"):
-            st.warning("Box scores are downloaded in order from most newest to oldest. If there are not enough box scores available, we will attempt to download as many as possible.")
+            st.warning("Box scores are downloaded in order from most newest to oldest and only the current season will be searched. If there are not enough box scores available, we will attempt to download as many as possible.")
 
-if ("Articles" in data_to_scrape):
+if "Articles" in data_to_scrape:
     with st.container(border=True):
         now = datetime.datetime.now()
         season_start = datetime.date(2025, 8, 21)
@@ -99,14 +81,9 @@ if ("Articles" in data_to_scrape):
         )
 
 with st.container(border=True):
-    output_folder_path: str | None = st.session_state.get("output_folder_path", None)
-    folder_select_button = st.button("Select Output Folder")
+    output_folder_path = '/Users/larryling/Desktop/untitled folder'
 
-    if (folder_select_button):
-        output_folder_path = select_output_folder()
-        st.session_state.output_folder_path = output_folder_path
-
-    if (output_folder_path):
+    if output_folder_path:
         st.write(f"_{output_folder_path}_")
     else:
         st.write("_No output folder selected._")
@@ -116,29 +93,29 @@ scrape_button = st.button(
     disabled=((not team_name) or (not data_to_scrape) or (not output_folder_path))
 )
 
-if (scrape_button):
-    team_data = teams.get(team_name, None)
+if scrape_button:
+    team_data = teams[team_name]
 
     ## TODO: Add checks for 504 Gateway timeouts.
 
     ## TODO: Add checks for unable to write to file destination.
 
     ## TODO: Add checks for SSL handshake error.
-    if ("Roster" in data_to_scrape):
-        output_file = f"{output_folder_path}\\{team_data["abbreviation"]} Roster.pdf"
-        download_tables(team_data["name"], "roster", team_data["roster_url"], output_file, ignored_roster_columns, pdfkit_config)
+    if "Roster" in data_to_scrape:
+        output_file = f"{output_folder_path}/{team_data['abbreviation']} Roster.pdf"
+        download_roster(team_data["name"], team_data["roster_url"], output_file)
 
-    if ("Schedule" in data_to_scrape):
-        output_file = f"{output_folder_path}\\{team_data["abbreviation"]} Schedule.pdf"
-        download_tables(team_data["name"], "schedule", team_data["schedule_url"], output_file, ignored_schedule_columns, pdfkit_config)
+    if "Schedule" in data_to_scrape:
+        output_file = f"{output_folder_path}/{team_data["abbreviation"]} Schedule.pdf"
+        download_schedule(team_data["name"], team_data["schedule_url"], output_file)
 
-    if ("Box Scores" in data_to_scrape):
+    if "Box Scores" in data_to_scrape:
         download_box_scores(team_data, count, output_folder_path)
 
-    if ("Stats" in data_to_scrape):
+    if "Stats" in data_to_scrape:
         download_stats(team_data, years, output_folder_path)
 
-    if ("Articles" in data_to_scrape):
+    if "Articles" in data_to_scrape:
         articles = fetch_articles(team_data, date_range)
 
         @st.fragment()
@@ -172,9 +149,10 @@ if (scrape_button):
             filtered_articles = articles.iloc[article_indexes]
 
             download_articles_button = st.button("Download Selected Articles")
-            if (download_articles_button):
-                download_articles(team_data, filtered_articles, output_folder_path, pdfkit_config)
+            if download_articles_button:
+                download_articles(filtered_articles, output_folder_path)
 
-        select_articles()
+        if articles is not None:
+            select_articles()
 
     st.write("All files have been downloaded!")

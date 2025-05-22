@@ -24,11 +24,10 @@ def download_box_scores(team_data: dict[str, str], count: int, output_folder_pat
 
     doc = BeautifulSoup(driver.page_source, "lxml")
 
-    box_score_pdf_urls = []
-    if (team_data["conference_schedule_provider"] == "Boost"):
+    if team_data["conference_schedule_provider"] == "Boost":
         box_score_pdf_urls = get_boost_box_score_pdf_urls(doc, count)
         download_boost_box_score_pdfs(box_score_pdf_urls, output_folder_path)
-    elif (team_data["conference_schedule_provider"] == "Sidearm"):
+    elif team_data["conference_schedule_provider"] == "Sidearm":
         box_score_pdf_urls = get_sidearm_match_data(driver, team_data, doc, count)
         download_sidearm_box_score_pdfs(box_score_pdf_urls, output_folder_path)
 
@@ -40,7 +39,7 @@ def download_boost_box_score_pdfs(box_score_pdf_urls: list[str], output_folder_p
     Downloads a PDF from the given URL.
 
     Args:
-        box_score_pdf_url (str): URL of the box score PDF.
+        box_score_pdf_urls (list[str]): URL of the box score PDF.
         output_folder_path (str): Path to save the downloaded PDF.
 
     Returns:
@@ -72,24 +71,6 @@ def download_sidearm_box_score_pdfs(box_score_pdf_urls: list[tuple[str, str, str
         with open(output_path, 'wb') as file:
             file.write(response.content)
 
-def download_pdf(box_score_pdf_url: str, output_folder_path: str) -> None:
-    """
-    Downloads a PDF from the given URL.
-
-    Args:
-        box_score_pdf_url (str): URL of the box score PDF.
-        output_folder_path (str): Path to save the downloaded PDF.
-
-    Returns:
-        None
-    """
-    filename = box_score_pdf_url.split("/")[-1]
-    output_path = f"{output_folder_path}/{filename}"
-
-    response = requests.get(box_score_pdf_url)
-    with open(output_path, 'wb') as file:
-        file.write(response.content)
-
 def get_boost_box_score_pdf_urls(doc: BeautifulSoup, count: int) -> list[str]:
     """
     Get the URLs of the box scores from the conference websites provided by Boost.
@@ -120,26 +101,26 @@ def get_sidearm_match_data(driver: webdriver.Chrome, team_data: dict[str, str], 
     Returns:
         list[tuple[str, str, str, str]]: List of match data represented as a tuple of the form (home_team, away_team, date, box_score_pdf_url).
     """
-    matchday_tables = doc.find_all("table")
-    matches = extract_matches(team_data, matchday_tables)
+    match_tables = doc.find_all("table")
+    matches = extract_matches(team_data, match_tables)
 
     return fetch_pdf_urls_for_matches(driver, matches, team_data, count)
 
-def extract_matches(team_data: dict[str, str], matchday_tables: list) -> list[tuple[str, str, str, str]]:
-    """Extract matches from the matchday tables.
+def extract_matches(team_data: dict[str, str], match_tables: list) -> list[tuple[str, str, str, str]]:
+    """Extract matches from the match tables.
 
     Args:
         team_data (dict[str, str]): Dictionary containing team data.
-        matchday_tables (list): List of matchday table elements.
+        match_tables (list): List of match table elements.
 
     Returns:
         list[tuple[str, str, str, str]]: List of match data represented as a tuple of the form (home_team, away_team, date, box_score_url).
     """
     matches = []
-    for matchday_table in matchday_tables:
-        matchday_table_body = matchday_table.find("tbody")
+    for match_table in match_tables:
+        match_table_body = match_table.find("tbody")
 
-        for tr in matchday_table_body.find_all("tr"):
+        for tr in match_table_body.find_all("tr"):
             away_team = get_team_name(tr, 'sidearm-team-away')
             home_team = get_team_name(tr, 'sidearm-team-home')
 
@@ -147,38 +128,38 @@ def extract_matches(team_data: dict[str, str], matchday_tables: list) -> list[tu
             if (away_team != team_data["name"]) and (home_team != team_data["name"]):
                 continue
 
-            date = extract_match_date(matchday_table)
+            date = extract_match_date(match_table)
             box_score_href = team_data["conference_base_url"] + tr.find("a", string="Box Score")["href"]
             matches.append((home_team, away_team, date, box_score_href))
 
     return matches
 
-def get_team_name(tr: BeautifulSoup, team_class: str) -> str:
+def get_team_name(table_row: BeautifulSoup, team_class: str) -> str:
     """
     Extract the team name from a table row.
 
     Args:
-        tr (BeautifulSoup): Table row element containing team data.
+        table_row (BeautifulSoup): Table row element containing team data.
         team_class (str): Class name to identify the team.
 
     Returns:
         str: Extracted team name.
     """
-    team_td = tr.select_one(f'td[class*="{team_class}"]')
+    team_td = table_row.select_one(f'td[class*="{team_class}"]')
     return team_td.find("span", class_="sidearm-calendar-list-group-list-game-team-title").find(['a', 'span']).text
 
-def extract_match_date(matchday_table: BeautifulSoup) -> str:
+def extract_match_date(match_table: BeautifulSoup) -> str:
     """
-    Extract the match date from the matchday table caption.
+    Extract the match date from the match table caption.
 
     Args:
-        matchday_table (BeautifulSoup): Matchday table element.
+        match_table (BeautifulSoup): Match table element.
 
     Returns:
         str: Extracted match date.
     """
-    matchday_table_caption = matchday_table.find("caption")
-    return matchday_table_caption.find("span", class_="hide-on-medium sidearm-calendar-list-group-heading-date").text.replace("/", "_")
+    match_table_caption = match_table.find("caption")
+    return match_table_caption.find("span", class_="hide-on-medium sidearm-calendar-list-group-heading-date").text.replace("/", "_")
 
 def fetch_pdf_urls_for_matches(driver: webdriver.Chrome, matches: list[tuple[str, str, str, str]], team_data: dict[str, str], count: int) -> list[tuple[str, str, str, str]]:
     """Fetch the PDF URLs for box scores for the given matches.

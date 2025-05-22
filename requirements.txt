@@ -8,3 +8,4 @@ html5lib
 python-dotenv
 pdfkit
 requests
+pandas

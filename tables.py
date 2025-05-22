@@ -50,7 +50,7 @@ def extract_tables(soup: BeautifulSoup, ignored_columns: list[str]) -> list[str]
     """
     tables = []
     for table in soup(["table"]):
-        if (not table.find("thead")):
+        if not table.find("thead"):
             continue
 
         sanitized_table = sanitize_html(table)

@@ -18,7 +18,7 @@ def download_stats(team_data: dict[str, str], years: list[int], output_folder_pa
     """
     st.write(f"Downloading {team_data['name']}'s stats...")
 
-    if (team_data["name"] == "Penn State"):
+    if team_data["name"] == "Penn State":
         download_penn_state_stats(team_data, output_folder_path)
     else:
         download_other_team_stats(team_data, years, output_folder_path)
@@ -41,7 +41,7 @@ def download_penn_state_stats(team_data: dict[str, str], output_folder_path: str
 
     response = requests.get(stats_url)
 
-    if (response.status_code == 404):
+    if response.status_code == 404:
         return
 
     output_path = f"{output_folder_path}/{team_data['abbreviation']} Stats.pdf"
@@ -64,7 +64,7 @@ def download_other_team_stats(team_data: dict[str, str], years: list[int], outpu
         stats_url = construct_stats_url(team_data, year)
         response = requests.get(stats_url)
 
-        if (response.status_code == 404):
+        if response.status_code == 404:
             st.write(f"Unable to find stats for {year} with the following URL: {stats_url}.")
             st.write("Continuing...")
             continue
