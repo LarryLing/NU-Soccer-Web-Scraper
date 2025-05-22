@@ -86,6 +86,17 @@ def download_articles(articles: DataFrame, output_folder_path: str) -> None:
     st.write("Finished downloading selected articles!")
 
 def scan_table_for_articles(team_data: dict[str, str], table: Tag, date_range: tuple[dt.date, dt.date]) -> DataFrame:
+    """
+    Scans through an HTML table and returns a DataFrame containing the date posted, headline, and URL.
+
+    Args:
+        team_data: Dictionary containing team data.
+        table: Table tag extracted from the HTML page.
+        date_range: Tuple containing start and end dates of articles to download.
+
+    Returns:
+        DataFrame: DataFrame of articles to download containing the date posted, headline, and URL.
+    """
     start_date, end_date = date_range
     sanitized_table = sanitize_html(table)
 
@@ -107,6 +118,17 @@ def scan_table_for_articles(team_data: dict[str, str], table: Tag, date_range: t
     return dataframe[(dataframe["Date"].dt.date >= start_date) & (dataframe["Date"].dt.date <= end_date)]
 
 def scan_ul_for_articles(team_data: dict[str, str], ul: Tag, date_range: tuple[dt.date, dt.date]) -> DataFrame:
+    """
+    Scans through an HTML list and returns a DataFrame containing the date posted, headline, and URL.
+
+    Args:
+        team_data: Dictionary containing team data.
+        table: Table tag extracted from the HTML page.
+        date_range: Tuple containing start and end dates of articles to download.
+
+    Returns:
+        DataFrame: DataFrame of articles to download containing the date posted, headline, and URL.
+    """
     start_date, end_date = date_range
     sanitized_ul = sanitize_html(ul)
     sanitized_ul = BeautifulSoup(sanitized_ul, "lxml")

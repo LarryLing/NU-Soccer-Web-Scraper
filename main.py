@@ -1,5 +1,4 @@
 import datetime
-import pdfkit
 import json
 import streamlit as st
 from articles import download_articles, fetch_articles
@@ -7,13 +6,9 @@ from box_scores import download_box_scores
 from roster import download_roster
 from schedule import download_schedule
 from stats import download_stats
-from tables import download_tables
-from utils import select_output_folder
 
 with open("teams.json", "r") as file:
     teams: dict[str, dict[str, str]] = json.load(file)
-
-# pdfkit_config = pdfkit.configuration(wkhtmltopdf=".\\wkhtmltopdf\\bin\\wkhtmltopdf.exe")
 
 st.title = "NU Soccer Web Scraper"
 
@@ -154,5 +149,3 @@ if scrape_button:
 
         if articles is not None:
             select_articles()
-
-    st.write("All files have been downloaded!")

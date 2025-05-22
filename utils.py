@@ -55,7 +55,7 @@ def sanitize_html(doc: Tag | None) -> str:
         tweet.extract()
 
     for table_row in doc.find_all("tr"):
-        if "s-table-body__row--ad" in table_row["class"]:
+        if ("class" in table_row) and ("s-table-body__row--ad" in table_row["class"]):
             table_row.extract()
 
     return str(doc)
