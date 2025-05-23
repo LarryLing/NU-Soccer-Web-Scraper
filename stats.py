@@ -72,6 +72,16 @@ def download_stats(team_data: dict[str, str], years: list[int], output_folder_pa
     st.write(f"Finished downloading {team_data['name']}'s stats!")
 
 def download_pdf(pdf_url: str, output_path: str) -> None:
+    """
+    Downloads a PDF file from a URL.
+
+    Args:
+        pdf_url:
+        output_path:
+
+    Returns:
+        None
+    """
     response = requests.get(pdf_url)
 
     if response.status_code == 404:

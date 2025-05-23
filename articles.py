@@ -9,7 +9,7 @@ from bs4 import BeautifulSoup, Tag
 from selenium.webdriver.common.print_page_options import PrintOptions
 from utils import initialize_web_driver, sanitize_html
 
-def fetch_articles(team_data: dict[str, str], date_range: tuple[dt.date, dt.date]) -> DataFrame | None:
+def fetch_articles(team_data: dict[str, str], date_range: tuple[dt.date, dt.date]) -> DataFrame:
     """
     Fetches a team's articles, returning their headlines and URLs.
 
@@ -18,7 +18,7 @@ def fetch_articles(team_data: dict[str, str], date_range: tuple[dt.date, dt.date
         date_range (tuple[date, date]): Range of dates to fetch articles from.
 
     Returns:
-        DataFrame | None: DataFrame of articles to download containing the date posted, headline, and URL. None is returned if no articles were found.
+        DataFrame: DataFrame of articles to download containing the date posted, headline, and URL. None is returned if no articles were found.
     """
     st.write(f"Fetching {team_data['name']}'s articles...")
 

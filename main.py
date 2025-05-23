@@ -147,5 +147,4 @@ if scrape_button:
             if download_articles_button:
                 download_articles(filtered_articles, output_folder_path)
 
-        if articles is not None:
-            select_articles()
+        select_articles()

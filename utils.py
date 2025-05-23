@@ -33,7 +33,7 @@ def initialize_web_driver() -> webdriver.Chrome:
     service = Service(executable_path="/usr/local/bin/chromedriver")
 
     chrome_options = Options()
-    # chrome_options.add_argument("--headless")
+    chrome_options.add_argument("--headless")
     chrome_options.add_argument("--log-level=3")
 
     return webdriver.Chrome(service=service, options=chrome_options)
@@ -51,11 +51,8 @@ def sanitize_html(doc: Tag | None) -> str:
     if not doc:
         return ""
 
-    for tweet in doc.find_all("div", class_="twitter-tweet twitter-tweet-rendered"):
-        tweet.extract()
-
     for table_row in doc.find_all("tr"):
-        if ("class" in table_row) and ("s-table-body__row--ad" in table_row["class"]):
+        if ("class" in table_row.attrs) and ("s-table-body__row--ad" in table_row["class"]):
             table_row.extract()
 
     return str(doc)
