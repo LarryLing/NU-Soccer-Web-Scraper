@@ -63,10 +63,10 @@ def download_schedule(team_name: str, url: str, output_file_path: str) -> None:
 
     print_options = PrintOptions()
     pdf = driver.print_page(print_options)
-    bytes = base64.b64decode(pdf)
+    pdf_bytes = base64.b64decode(pdf)
 
     with open(output_file_path, "wb") as f:
-        f.write(bytes)
+        f.write(pdf_bytes)
 
     driver.quit()
 

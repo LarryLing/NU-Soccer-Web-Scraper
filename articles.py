@@ -122,7 +122,7 @@ def scan_ul_for_articles(team_data: dict[str, str], ul: Tag, date_range: tuple[d
 
     Args:
         team_data: Dictionary containing team data.
-        table: Table tag extracted from the HTML page.
+        ul: Ul tag extracted from the HTML page.
         date_range: Tuple containing start and end dates of articles to download.
 
     Returns:

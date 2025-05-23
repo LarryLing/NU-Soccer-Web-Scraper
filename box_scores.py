@@ -19,15 +19,24 @@ def download_box_scores(team_data: dict[str, str], count: int, output_folder_pat
     st.write(f"Downloading {team_data['name']}'s box scores...")
 
     driver = initialize_web_driver()
-    driver.get(team_data["conference_schedule_url"])
-    time.sleep(1)
-
-    doc = BeautifulSoup(driver.page_source, "lxml")
 
     if team_data["conference_schedule_provider"] == "Boost":
+        schedule_url = f"{team_data['conference_base_url']}/msoc/schedule/?teamFilter={team_data['abbreviation']}"
+
+        driver.get(schedule_url)
+        time.sleep(1)
+        doc = BeautifulSoup(driver.page_source, "lxml")
+
         box_score_pdf_urls = get_boost_box_score_pdf_urls(doc, count)
         download_boost_box_score_pdfs(box_score_pdf_urls, output_folder_path)
+
     elif team_data["conference_schedule_provider"] == "Sidearm":
+        schedule_url = f"{team_data['conference_base_url']}/calendar.aspx?path=msoc"
+
+        driver.get(schedule_url)
+        time.sleep(1)
+        doc = BeautifulSoup(driver.page_source, "lxml")
+
         box_score_pdf_urls = get_sidearm_match_data(driver, team_data, doc, count)
         download_sidearm_box_score_pdfs(box_score_pdf_urls, output_folder_path)
 
