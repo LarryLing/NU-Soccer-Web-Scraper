@@ -10,6 +10,9 @@ from stats import download_stats
 with open("teams.json", "r") as file:
     teams: dict[str, dict[str, str]] = json.load(file)
 
+with open("config.json", "r") as file:
+    config: dict[str, str] = json.load(file)
+
 st.title = "NU Soccer Web Scraper"
 
 team_name = st.selectbox(
@@ -76,12 +79,11 @@ if "Articles" in data_to_scrape:
         )
 
 with st.container(border=True):
-    output_folder_path = '/Users/larryling/Desktop/untitled folder'
+    output_folder_path = st.text_input(
+        label="Select an output folder:",
+        value=config["output_folder_path"])
 
-    if output_folder_path:
-        st.write(f"_{output_folder_path}_")
-    else:
-        st.write("_No output folder selected._")
+    st.write("Selected output folder:", output_folder_path)
 
 scrape_button = st.button(
     label="Download",

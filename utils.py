@@ -1,3 +1,4 @@
+import json
 import tkinter as tk
 import os
 from selenium import webdriver
@@ -30,7 +31,10 @@ def initialize_web_driver() -> webdriver.Chrome:
     Returns:
         WebDriver: A new web driver instance.
     """
-    service = Service(executable_path="/usr/local/bin/chromedriver")
+    with open("config.json", "r") as file:
+        config: dict[str, str] = json.load(file)
+
+    service = Service(executable_path=config["chrome_driver_executable_path"])
 
     chrome_options = Options()
     chrome_options.add_argument("--headless")
