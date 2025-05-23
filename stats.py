@@ -37,7 +37,7 @@ def download_stats(team_data: dict[str, str], years: list[int], output_folder_pa
         "Wisconsin",
         "Penn State",
         "UIC",
-        "Loyola",
+        "Loyola Chicago",
         "Northern Illinois",
         "Chicago State"
     ]

@@ -149,4 +149,7 @@ if scrape_button:
             if download_articles_button:
                 download_articles(filtered_articles, output_folder_path)
 
-        select_articles()
+        if articles is not None:
+            select_articles()
+        else:
+            st.write("No articles could be found.")

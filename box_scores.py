@@ -189,7 +189,12 @@ def fetch_pdf_urls_for_matches(driver: webdriver.Chrome, matches: list[tuple[str
         time.sleep(1)
 
         doc = BeautifulSoup(driver.page_source, "lxml")
-        box_score_preview_url = team_data["conference_base_url"] + doc.find("div", id="print-bar").find("a")["href"]
+        print_bar = doc.find("div", id="print-bar")
+        if print_bar:
+            box_score_preview_url = team_data["conference_base_url"] + print_bar.find("a")["href"]
+        else:
+            st.write(f"No box score PDF available for {match[0]} vs. {match[1]} on {match[2]}, continuing...")
+            continue
 
         driver.get(box_score_preview_url)
         time.sleep(1)

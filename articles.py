@@ -9,7 +9,7 @@ from bs4 import BeautifulSoup, Tag
 from selenium.webdriver.common.print_page_options import PrintOptions
 from utils import initialize_web_driver, sanitize_html
 
-def fetch_articles(team_data: dict[str, str], date_range: tuple[dt.date, dt.date]) -> DataFrame:
+def fetch_articles(team_data: dict[str, str], date_range: tuple[dt.date, dt.date]) -> DataFrame | None:
     """
     Fetches a team's articles, returning their headlines and URLs.
 
@@ -18,7 +18,7 @@ def fetch_articles(team_data: dict[str, str], date_range: tuple[dt.date, dt.date
         date_range (tuple[date, date]): Range of dates to fetch articles from.
 
     Returns:
-        DataFrame: DataFrame of articles to download containing the date posted, headline, and URL. None is returned if no articles were found.
+        DataFrame | None: DataFrame of articles to download containing the date posted, headline, and URL. None is returned if no articles were found.
     """
     st.write(f"Fetching {team_data['name']}'s articles...")
 
@@ -34,13 +34,19 @@ def fetch_articles(team_data: dict[str, str], date_range: tuple[dt.date, dt.date
     article_display_type = team_data["article_display_type"]
     if article_display_type == "table":
         table = doc.find("table")
-        articles_df = scan_table_for_articles(team_data, table, date_range)
+        if table:
+            articles_df = scan_table_for_articles(team_data, table, date_range)
     elif article_display_type == "list":
-        ul = doc.find("div", class_="vue-archives-stories").find("ul")
-        articles_df = scan_ul_for_articles(team_data, ul, date_range)
+        div = doc.find("div", class_="vue-archives-stories")
+        if div:
+            ul = div.find("ul")
+            articles_df = scan_ul_for_articles(team_data, ul, date_range)
 
-    st.write(f"Finished fetching {team_data['name']}'s articles!")
-    return articles_df
+    if articles_df is not None:
+        st.write(f"Finished fetching {team_data['name']}'s articles!")
+        return articles_df
+    else:
+        return None
 
 def download_articles(articles: DataFrame, output_folder_path: str) -> None:
     """
@@ -77,7 +83,9 @@ def download_articles(articles: DataFrame, output_folder_path: str) -> None:
         print_options = PrintOptions()
         pdf = driver.print_page(print_options)
         pdf_bytes = base64.b64decode(pdf)
-        output_file_path = f"{output_folder_path}/{row['Headline']}.pdf"
+
+        headline = row["Headline"].replace("/", "_")
+        output_file_path = f"{output_folder_path}/{headline}.pdf"
 
         with open(output_file_path, "wb") as f:
             f.write(pdf_bytes)
@@ -134,7 +142,8 @@ def scan_ul_for_articles(team_data: dict[str, str], ul: Tag, date_range: tuple[d
 
     articles_list = []
     for li in sanitized_ul.find_all("li", class_="vue-archives-item flex"):
-        date_string = li.find("span").text.replace("Date: ", "")
+        span = li.find("div", class_="vue-archives-item--metadata").find("span")
+        date_string = span.text.replace("Date: ", "")
         date = dt.datetime.strptime(date_string, '%B %d, %Y').date()
 
         if start_date <= date <= end_date:

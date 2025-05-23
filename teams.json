@@ -38,7 +38,7 @@
     "Maryland": {
         "name": "Maryland",
         "abbreviation": "MD",
-        "base_url": "umterps.com",
+        "base_url": "https://umterps.com",
         "roster_url": "https://umterps.com/sports/mens-soccer/roster?print=true",
         "schedule_url": "https://umterps.com/sports/mens-soccer/schedule?print=true",
         "stats_url": "https://umterps.com/sports/mens-soccer/stats/{0}/pdf",
@@ -50,7 +50,7 @@
     "Washington": {
         "name": "Washington",
         "abbreviation": "WASH",
-        "base_url": "gohuskies.com",
+        "base_url": "https://gohuskies.com",
         "roster_url": "https://gohuskies.com/sports/mens-soccer/roster?print=true",
         "schedule_url": "https://gohuskies.com/sports/mens-soccer/schedule?print=true",
         "stats_url": "https://gohuskies.com/sports/mens-soccer/stats/{0}/pdf",

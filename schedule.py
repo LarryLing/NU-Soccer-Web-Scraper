@@ -1,6 +1,7 @@
 import base64
 import time
 import os
+from io import StringIO
 import pandas as pd
 import streamlit as st
 from bs4 import BeautifulSoup
@@ -54,6 +55,9 @@ def download_schedule(team_name: str, url: str, output_file_path: str) -> None:
 
         extracted_tables = extract_tables(soup)
 
+        if not extracted_tables:
+            st.write(f"Could not find tables to extract. This is likely caused by the website's internal server error.\n{url}")
+
         full_html = build_html_document(soup.find("title").text, extracted_tables)
 
         with open("temp.html", "w") as f:
@@ -80,14 +84,17 @@ def extract_tables(soup: BeautifulSoup) -> list[str]:
         soup (BeautifulSoup): Parsed HTML document.
 
     Returns:
-        list[str]: List of HTML strings containing tables.
+        list[str]: List of HTML strings containing tables. Returns None if no tables were found.
     """
-    sanitized_html = sanitize_html(soup)
-    dataframes = pd.read_html(sanitized_html)
-    for dataframe in dataframes:
-        dataframe.fillna("", inplace=True)
+    try:
+        sanitized_html = sanitize_html(soup)
+        dataframes = pd.read_html(StringIO(sanitized_html))
+        for dataframe in dataframes:
+            dataframe.fillna("", inplace=True)
 
-    return [dataframe.to_html(index=False) for dataframe in dataframes]
+        return [dataframe.to_html(index=False) for dataframe in dataframes]
+    except:
+        return []
 
 def build_html_document(title: str, html_tables: list[str]) -> str:
     """
