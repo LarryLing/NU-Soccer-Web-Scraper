@@ -5,6 +5,7 @@ import os
 import streamlit as st
 import requests
 from selenium import webdriver
+from selenium.common import InvalidArgumentException
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.chrome.options import Options
 from bs4 import Tag
@@ -103,11 +104,14 @@ def print_to_pdf(driver: webdriver.Chrome, output_file_path: str) -> None:
     Returns:
         None
     """
-    print_options = PrintOptions()
-    pdf = driver.print_page(print_options)
-    pdf_bytes = base64.b64decode(pdf)
+    try:
+        print_options = PrintOptions()
+        pdf = driver.print_page(print_options)
+        pdf_bytes = base64.b64decode(pdf)
 
-    with open(output_file_path, "wb") as f:
-        f.write(pdf_bytes)
+        with open(output_file_path, "wb") as f:
+            f.write(pdf_bytes)
 
-    st.write(f"**{output_file_path.split('/')[-1]}** Downloaded!")
+        st.write(f"**{output_file_path.split('/')[-1]}** Downloaded!")
+    except InvalidArgumentException as e:
+        st.write(f"**{output_file_path.split('/')[-1]}** Failed!\nReason: {e}")

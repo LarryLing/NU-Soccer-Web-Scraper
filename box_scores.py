@@ -178,7 +178,7 @@ def fetch_pdf_urls_for_matches(driver: webdriver.Chrome, matches: list[tuple[str
                 box_score_preview_url = team_data["conference_base_url"] + print_bar.find("a")["href"]
             else:
                 raise ElementNotVisibleException(
-                    f"No box score PDF available for {match[0]} vs. {match[1]} on {match[2]}, continuing...")
+                    f"No box score PDF available for {match[0]} vs. {match[1]} on {match[2]}")
 
             driver.get(box_score_preview_url)
             time.sleep(1)

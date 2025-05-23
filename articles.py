@@ -42,7 +42,7 @@ def fetch_articles(team_data: dict, date_range: tuple[dt.date, dt.date]) -> Data
                 articles_df = scan_ul_for_articles(team_data, ul, date_range)
 
         if articles_df is not None:
-            st.write(f"Finished fetching {team_data['name']}'s articles!")
+            st.write(f"**Fetching Articles** Success!")
             return articles_df
     except TimeoutException as e:
         st.write(f"**Fetching Articles** Failed!\nReason: {e}")
@@ -63,6 +63,9 @@ def download_articles(articles: DataFrame, output_folder_path: str) -> None:
     Returns:
         None
     """
+    if (len(articles) == 0):
+        return
+
     driver = initialize_web_driver()
 
     script = """

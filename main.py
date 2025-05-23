@@ -1,6 +1,7 @@
 import datetime
 import json
 import streamlit as st
+import os
 from articles import download_articles, fetch_articles
 from box_scores import download_box_scores
 from roster import download_roster
@@ -80,10 +81,13 @@ if "Articles" in data_to_scrape:
 
 with st.container(border=True):
     output_folder_path = st.text_input(
-        label="Select an output folder:",
+        label="Enter an output folder path:",
         value=config["output_folder_path"])
 
-    st.write("Selected output folder:", output_folder_path)
+    if os.path.exists(output_folder_path):
+        st.write("Selected output folder:", output_folder_path)
+    else:
+        st.write("Please select a valid output folder.")
 
 scrape_button = st.button(
     label="Download",
