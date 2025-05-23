@@ -1,15 +1,16 @@
 import base64
 import json
-import tkinter as tk
 import os
-import streamlit as st
+import tkinter as tk
+from tkinter import filedialog
+
 import requests
+import streamlit as st
+from bs4 import Tag
 from selenium import webdriver
 from selenium.common import InvalidArgumentException
-from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.chrome.options import Options
-from bs4 import Tag
-from tkinter import filedialog
+from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.common.print_page_options import PrintOptions
 
 
@@ -84,7 +85,7 @@ def download_pdf(pdf_url: str, output_file_path: str) -> None:
     response = requests.get(pdf_url)
     if response.status_code == 404:
         st.write(
-            f"**{output_file_path.split('/')[-1]}** Failed!\nReason: Found a PDF URL, but it doesn't link to an existing file.")
+            f"**{output_file_path.split('/')[-1]}** Failed!  \nReason: Found a PDF URL, but it doesn't link to an existing file.")
         return
 
     with open(output_file_path, 'wb') as file:
@@ -114,4 +115,4 @@ def print_to_pdf(driver: webdriver.Chrome, output_file_path: str) -> None:
 
         st.write(f"**{output_file_path.split('/')[-1]}** Downloaded!")
     except InvalidArgumentException as e:
-        st.write(f"**{output_file_path.split('/')[-1]}** Failed!\nReason: {e}")
+        st.write(f"**{output_file_path.split('/')[-1]}** Failed!  \nReason: {e}")

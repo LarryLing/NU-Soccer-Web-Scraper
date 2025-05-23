@@ -1,9 +1,11 @@
 import time
+
 import streamlit as st
 from bs4 import BeautifulSoup
-from selenium.common import TimeoutException, ElementNotVisibleException
-from utils import initialize_web_driver, download_pdf
 from selenium import webdriver
+from selenium.common import TimeoutException, ElementNotVisibleException
+
+from utils import initialize_web_driver, download_pdf
 
 
 def download_box_scores(team_data: dict, count: int, output_folder_path: str) -> None:
@@ -188,8 +190,8 @@ def fetch_pdf_urls_for_matches(driver: webdriver.Chrome, matches: list[tuple[str
 
             match_data.append((match[0], match[1], match[2], box_score_pdf_url))
         except TimeoutException as e:
-            st.write(f"**{match[0]} vs. {match[1]} {match[2]}.pdf** Failed!\nReason: {e}")
+            st.write(f"**{match[0]} vs. {match[1]} {match[2]}.pdf** Failed!  \nReason: {e}")
         except ElementNotVisibleException as e:
-            st.write(f"**{match[0]} vs. {match[1]} {match[2]}.pdf** Failed!\nReason: {e}")
+            st.write(f"**{match[0]} vs. {match[1]} {match[2]}.pdf** Failed!  \nReason: {e}")
 
     return match_data

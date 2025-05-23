@@ -1,11 +1,13 @@
+import datetime as dt
 import time
+from io import StringIO
+
 import pandas as pd
 import streamlit as st
-import datetime as dt
-from io import StringIO
-from pandas import DataFrame
 from bs4 import BeautifulSoup, Tag
+from pandas import DataFrame
 from selenium.common import TimeoutException
+
 from utils import initialize_web_driver, sanitize_html, print_to_pdf
 
 
@@ -45,7 +47,7 @@ def fetch_articles(team_data: dict, date_range: tuple[dt.date, dt.date]) -> Data
             st.write(f"**Fetching Articles** Success!")
             return articles_df
     except TimeoutException as e:
-        st.write(f"**Fetching Articles** Failed!\nReason: {e}")
+        st.write(f"**Fetching Articles** Failed!  \nReason: {e}")
     finally:
         driver.quit()
 
@@ -63,7 +65,7 @@ def download_articles(articles: DataFrame, output_folder_path: str) -> None:
     Returns:
         None
     """
-    if (len(articles) == 0):
+    if len(articles) == 0:
         return
 
     driver = initialize_web_driver()
@@ -91,7 +93,7 @@ def download_articles(articles: DataFrame, output_folder_path: str) -> None:
 
             print_to_pdf(driver, output_file_path)
         except TimeoutException as e:
-            st.write(f"**{output_file_path.split('/')[-1]}** Failed!\nReason: {e}")
+            st.write(f"**{output_file_path.split('/')[-1]}** Failed!  \nReason: {e}")
 
     driver.quit()
 

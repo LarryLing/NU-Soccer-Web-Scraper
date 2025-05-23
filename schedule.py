@@ -1,9 +1,11 @@
-import time
 import os
+import time
 from io import StringIO
+
 import pandas as pd
 import streamlit as st
 from bs4 import BeautifulSoup
+
 from utils import initialize_web_driver, sanitize_html, print_to_pdf
 
 
@@ -55,7 +57,7 @@ def download_schedule(team_name: str, url: str, output_file_path: str) -> None:
 
             if not extracted_tables:
                 raise ValueError(
-                    f"Could not find tables to extract. This is likely caused by the website's internal server error.\n{url}")
+                    f"Could not find tables to extract. This is likely caused by the website's internal server error.  \n{url}")
 
             full_html = build_html_document(soup.find("title").text, extracted_tables)
 
@@ -66,7 +68,7 @@ def download_schedule(team_name: str, url: str, output_file_path: str) -> None:
 
         print_to_pdf(driver, output_file_path)
     except Exception as e:
-        st.write(f"**{output_file_path.split('/')[-1]}** Failed!\nReason: {e}")
+        st.write(f"**{output_file_path.split('/')[-1]}** Failed!  \nReason: {e}")
     finally:
         driver.quit()
 

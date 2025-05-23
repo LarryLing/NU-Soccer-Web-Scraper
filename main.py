@@ -1,7 +1,9 @@
 import datetime
 import json
-import streamlit as st
 import os
+
+import streamlit as st
+
 from articles import download_articles, fetch_articles
 from box_scores import download_box_scores
 from roster import download_roster
@@ -51,7 +53,8 @@ if "Stats" in data_to_scrape:
         )
 
         with st.expander("**Disclaimer**"):
-            st.warning("Options for years will be added at the start of every calendar year. However, please be aware that depending on the time of current season, there might not be stats available to download yet.")
+            st.warning(
+                "Options for years will be added at the start of every calendar year. However, please be aware that depending on the time of current season, there might not be stats available to download yet.")
 
 if "Box Scores" in data_to_scrape:
     with st.container(border=True):
@@ -65,7 +68,8 @@ if "Box Scores" in data_to_scrape:
         )
 
         with st.expander("**Disclaimer**"):
-            st.warning("Box scores are downloaded in order from most newest to oldest and only the current season will be searched. If there are not enough box scores available, we will attempt to download as many as possible.")
+            st.warning(
+                "Box scores are downloaded in order from most newest to oldest and only the current season will be searched. If there are not enough box scores available, we will attempt to download as many as possible.")
 
 if "Articles" in data_to_scrape:
     with st.container(border=True):
@@ -114,6 +118,7 @@ if scrape_button:
     if "Articles" in data_to_scrape:
         articles = fetch_articles(team_data, date_range)
 
+
         @st.fragment()
         def select_articles():
             column_configuration = {
@@ -147,6 +152,7 @@ if scrape_button:
             download_articles_button = st.button("Download Selected Articles")
             if download_articles_button:
                 download_articles(filtered_articles, output_folder_path)
+
 
         if articles is not None:
             select_articles()

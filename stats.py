@@ -1,6 +1,9 @@
 import time
+
 import streamlit as st
 from bs4 import BeautifulSoup
+from selenium.common import TimeoutException
+
 from utils import initialize_web_driver, download_pdf
 
 
@@ -41,16 +44,20 @@ def download_stats(team_data: dict, years: list[int], output_folder_path: str) -
     ]
 
     for year in years:
-        if (team_data["name"] == "Penn State") or (team_data["name"] == "Northern Illinois"):
-            driver.get(team_data["stats_url"][str(year)])
+        output_file_path = f"{output_folder_path}/{team_data['abbreviation']} {year} Stats.pdf"
+
+        try:
+            if (team_data["name"] == "Penn State") or (team_data["name"] == "Northern Illinois"):
+                driver.get(team_data["stats_url"][str(year)])
+            else:
+                driver.get(team_data["stats_url"].format(year))
+
             time.sleep(1)
-        else:
-            driver.get(team_data["stats_url"].format(year))
-            time.sleep(1)
+        except TimeoutException as e:
+            st.write(f"**{output_file_path.split('/')[-1]}** Failed!  \nReason: {e}")
+            continue
 
         doc = BeautifulSoup(driver.page_source, "lxml")
-
-        output_file_path = f"{output_folder_path}/{team_data['abbreviation']} {year} Stats.pdf"
 
         if team_data["name"] in pdf_url_in_embed:
             embed_tag = doc.find("embed")
@@ -63,6 +70,6 @@ def download_stats(team_data: dict, years: list[int], output_folder_path: str) -
                 download_pdf(object_tag["data"], output_file_path)
                 continue
 
-        st.write(f"**{output_file_path.split('/')[-1]}** Failed!\nReason: Could not find the PDF url.")
+        st.write(f"**{output_file_path.split('/')[-1]}** Failed!  \nReason: Could not find the PDF url.")
 
     driver.quit()
