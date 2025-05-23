@@ -1,23 +1,21 @@
 import time
-import requests
 import streamlit as st
 from bs4 import BeautifulSoup
-from utils import initialize_web_driver
+from utils import initialize_web_driver, download_pdf
 
-def download_stats(team_data: dict[str, str], years: list[int], output_folder_path: str) -> None:
+
+def download_stats(team_data: dict, years: list[int], output_folder_path: str) -> None:
     """
     Downloads a team's season stats to a PDF file.
 
     Args:
-        team_data (dict[str, str]): Dictionary containing team data.
-        years (list[int]): Years for which to print stats for.
-        output_folder_path (str): Path to the output folder.
+        team_data: Dictionary containing team data.
+        years: Years for which to print stats for.
+        output_folder_path: Path to the output folder.
 
     Returns:
         None
     """
-    st.write(f"Downloading {team_data['name']}'s stats...")
-
     driver = initialize_web_driver()
 
     pdf_url_in_embed = [
@@ -52,41 +50,19 @@ def download_stats(team_data: dict[str, str], years: list[int], output_folder_pa
 
         doc = BeautifulSoup(driver.page_source, "lxml")
 
-        output_path = f"{output_folder_path}/{team_data['abbreviation']} {year} Stats.pdf"
+        output_file_path = f"{output_folder_path}/{team_data['abbreviation']} {year} Stats.pdf"
 
         if team_data["name"] in pdf_url_in_embed:
             embed_tag = doc.find("embed")
             if embed_tag:
-                download_pdf(embed_tag["src"], output_path)
+                download_pdf(embed_tag["src"], output_file_path)
                 continue
         elif team_data["name"] in pdf_url_in_object:
             object_tag = doc.find("object")
             if object_tag:
-                download_pdf(object_tag["data"], output_path)
+                download_pdf(object_tag["data"], output_file_path)
                 continue
 
-        st.write(f"Could not find stats for the year {year}, continuing...")
+        st.write(f"**{output_file_path.split('/')[-1]}** Failed!\nReason: Could not find the PDF url.")
 
     driver.quit()
-
-    st.write(f"Finished downloading {team_data['name']}'s stats!")
-
-def download_pdf(pdf_url: str, output_path: str) -> None:
-    """
-    Downloads a PDF file from a URL.
-
-    Args:
-        pdf_url:
-        output_path:
-
-    Returns:
-        None
-    """
-    response = requests.get(pdf_url)
-
-    if response.status_code == 404:
-        st.write(f"{pdf_url} does not link to an existing PDF, continuing...")
-        return
-
-    with open(output_path, 'wb') as file:
-        file.write(response.content)

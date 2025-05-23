@@ -8,10 +8,10 @@ from schedule import download_schedule
 from stats import download_stats
 
 with open("teams.json", "r") as file:
-    teams: dict[str, dict[str, str]] = json.load(file)
+    teams: dict = json.load(file)
 
 with open("config.json", "r") as file:
-    config: dict[str, str] = json.load(file)
+    config: dict = json.load(file)
 
 st.title = "NU Soccer Web Scraper"
 
@@ -93,14 +93,9 @@ scrape_button = st.button(
 if scrape_button:
     team_data = teams[team_name]
 
-    ## TODO: Add checks for 504 Gateway timeouts.
-
-    ## TODO: Add checks for unable to write to file destination.
-
-    ## TODO: Add checks for SSL handshake error.
     if "Roster" in data_to_scrape:
         output_file = f"{output_folder_path}/{team_data['abbreviation']} Roster.pdf"
-        download_roster(team_data["name"], team_data["roster_url"], output_file)
+        download_roster(team_data["roster_url"], output_file)
 
     if "Schedule" in data_to_scrape:
         output_file = f"{output_folder_path}/{team_data["abbreviation"]} Schedule.pdf"
