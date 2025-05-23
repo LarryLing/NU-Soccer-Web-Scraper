@@ -2,166 +2,217 @@
     "Northwestern": {
         "name": "Northwestern",
         "abbreviation": "NU",
-        "base_website_type": 1,
-        "hostname": "nusports.com",
+        "base_url": "https://nusports.com",
         "roster_url": "https://nusports.com/sports/mens-soccer/roster/print",
         "schedule_url": "https://nusports.com/sports/mens-soccer/schedule/print?view=table&print=auto",
+        "stats_url": "https://nusports.com/sports/mens-soccer/stats/{0}/pdf",
         "conference_schedule_provider": "Boost",
         "conference_base_url": "https://bigten.org",
-        "conference_schedule_url": "https://bigten.org/msoc/schedule/?teamFilter=NU"
+        "conference_schedule_url": "https://bigten.org/msoc/schedule/?teamFilter=NU",
+        "article_display_type": "table",
+        "articles_url": "https://nusports.com/sports/mens-soccer/archives"
     },
     "Indiana": {
         "name": "Indiana",
         "abbreviation": "IND",
-        "base_website_type": 1,
-        "hostname": "iuhoosiers.com",
+        "base_url": "https://iuhoosiers.com",
         "roster_url":"https://iuhoosiers.com/sports/mens-soccer/roster/print",
         "schedule_url": "https://iuhoosiers.com/sports/mens-soccer/schedule/print?view=table&print=auto",
+        "stats_url": "https://iuhoosiers.com/sports/mens-soccer/stats/{0}/pdf",
         "conference_schedule_provider": "Boost",
         "conference_base_url": "https://bigten.org",
-        "conference_schedule_url": "https://bigten.org/msoc/schedule/?teamFilter=IND"
+        "conference_schedule_url": "https://bigten.org/msoc/schedule/?teamFilter=IND",
+        "article_display_type": "table",
+        "articles_url": "https://iuhoosiers.com/sports/mens-soccer/archives"
     },
     "Ohio State": {
         "name": "Ohio State",
         "abbreviation": "OSU",
-        "base_website_type": 1,
-        "hostname": "ohiostatebuckeyes.com",
+        "base_url": "https://ohiostatebuckeyes.com",
         "roster_url": "https://ohiostatebuckeyes.com/sports/mens-soccer/roster/print",
         "schedule_url": "https://ohiostatebuckeyes.com/sports/mens-soccer/schedule/print?view=table&print=auto",
+        "stats_url": "https://ohiostatebuckeyes.com/sports/mens-soccer/stats/{0}/pdf",
         "conference_schedule_provider": "Boost",
         "conference_base_url": "https://bigten.org",
-        "conference_schedule_url": "https://bigten.org/msoc/schedule/?teamFilter=OSU"
+        "conference_schedule_url": "https://bigten.org/msoc/schedule/?teamFilter=OSU",
+        "article_display_type": "table",
+        "articles_url": "https://ohiostatebuckeyes.com/archives?path=msoc"
     },
     "Maryland": {
         "name": "Maryland",
         "abbreviation": "MD",
-        "base_website_type": 2,
-        "hostname": "umterps.com",
+        "base_url": "umterps.com",
         "roster_url": "https://umterps.com/sports/mens-soccer/roster?print=true",
         "schedule_url": "https://umterps.com/sports/mens-soccer/schedule?print=true",
+        "stats_url": "https://umterps.com/sports/mens-soccer/stats/{0}/pdf",
         "conference_schedule_provider": "Boost",
         "conference_base_url": "https://bigten.org",
-        "conference_schedule_url": "https://bigten.org/msoc/schedule/?teamFilter=MD"
+        "conference_schedule_url": "https://bigten.org/msoc/schedule/?teamFilter=MD",
+        "article_display_type": "table",
+        "articles_url": "https://umterps.com/sports/mens-soccer/archives"
     },
     "Washington": {
         "name": "Washington",
         "abbreviation": "WASH",
-        "base_website_type": 2,
-        "hostname": "gohuskies.com",
+        "base_url": "gohuskies.com",
         "roster_url": "https://gohuskies.com/sports/mens-soccer/roster?print=true",
         "schedule_url": "https://gohuskies.com/sports/mens-soccer/schedule?print=true",
+        "stats_url": "https://gohuskies.com/sports/mens-soccer/stats/{0}/pdf",
         "conference_schedule_provider": "Boost",
         "conference_base_url": "https://bigten.org",
-        "conference_schedule_url": "https://bigten.org/msoc/schedule/?teamFilter=WASH"
+        "conference_schedule_url": "https://bigten.org/msoc/schedule/?teamFilter=WASH",
+        "article_display_type": "table",
+        "articles_url": "https://gohuskies.com/sports/mens-soccer/archives"
     },
     "UCLA": {
         "name": "UCLA",
         "abbreviation": "UCLA",
-        "base_website_type": 1,
-        "hostname": "uclabruins.com",
+        "base_url": "https://uclabruins.com",
         "roster_url": "https://uclabruins.com/sports/mens-soccer/roster/print",
         "schedule_url": "https://uclabruins.com/sports/mens-soccer/schedule/print?view=table&print=auto",
+        "stats_url": "https://uclabruins.com/sports/mens-soccer/stats/{0}/pdf",
         "conference_schedule_provider": "Boost",
         "conference_base_url": "https://bigten.org",
-        "conference_schedule_url": "https://bigten.org/msoc/schedule/?teamFilter=UCLA"
+        "conference_schedule_url": "https://bigten.org/msoc/schedule/?teamFilter=UCLA",
+        "article_display_type": "table",
+        "articles_url": "https://uclabruins.com/sports/mens-soccer/archives"
     },
     "Michigan State": {
         "name": "Michigan State",
         "abbreviation": "MSU",
-        "base_website_type": 1,
-        "hostname": "msuspartans.com",
+        "base_url": "https://msuspartans.com",
         "roster_url": "https://msuspartans.com/sports/mens-soccer/roster/print",
         "schedule_url": "https://msuspartans.com/sports/mens-soccer/schedule/print?view=table&print=auto",
+        "stats_url": "https://msuspartans.com/sports/mens-soccer/stats/{0}/pdf",
         "conference_schedule_provider": "Boost",
         "conference_base_url": "https://bigten.org",
-        "conference_schedule_url": "https://bigten.org/msoc/schedule/?teamFilter=MSU"
+        "conference_schedule_url": "https://bigten.org/msoc/schedule/?teamFilter=MSU",
+        "article_display_type": "table",
+        "articles_url": "https://msuspartans.com/sports/mens-soccer/archives"
     },
     "Michigan": {
         "name": "Michigan",
         "abbreviation": "MICH",
-        "base_website_type": 1,
-        "hostname": "mgoblue.com",
+        "base_url": "https://mgoblue.com",
         "roster_url": "https://mgoblue.com/sports/mens-soccer/roster/print",
         "schedule_url": "https://mgoblue.com/sports/mens-soccer/schedule/print?view=table&print=auto",
+        "stats_url": "https://mgoblue.com/sports/mens-soccer/stats/{0}/pdf",
         "conference_schedule_provider": "Boost",
         "conference_base_url": "https://bigten.org",
-        "conference_schedule_url": "https://bigten.org/msoc/schedule/?teamFilter=MICH"
+        "conference_schedule_url": "https://bigten.org/msoc/schedule/?teamFilter=MICH",
+        "article_display_type": "table",
+        "articles_url": "https://mgoblue.com/sports/mens-soccer/archives"
     },
     "Rutgers": {
         "name": "Rutgers",
         "abbreviation": "RU",
-        "base_website_type": 2,
-        "hostname": "scarletknights.com",
+        "base_url": "https://scarletknights.com",
         "roster_url": "https://scarletknights.com/sports/mens-soccer/roster?print=true",
         "schedule_url": "https://scarletknights.com/sports/mens-soccer/schedule?print=true",
+        "stats_url": "https://scarletknights.com/sports/mens-soccer/stats/{0}/pdf",
         "conference_schedule_provider": "Boost",
         "conference_base_url": "https://bigten.org",
-        "conference_schedule_url": "https://bigten.org/msoc/schedule/?teamFilter=RU"
+        "conference_schedule_url": "https://bigten.org/msoc/schedule/?teamFilter=RU",
+        "article_display_type": "list",
+        "articles_url": "https://scarletknights.com/sports/mens-soccer/archives?search=&sport=msoc&season=0"
     },
     "Wisconsin": {
         "name": "Wisconsin",
         "abbreviation": "WIS",
-        "base_website_type": 2,
-        "hostname": "uwbadgers.com",
+        "base_url": "https://uwbadgers.com",
         "roster_url": "https://uwbadgers.com/sports/mens-soccer/roster?print=true",
         "schedule_url": "https://uwbadgers.com/sports/mens-soccer/schedule?print=true",
+        "stats_url": "https://uwbadgers.com/sports/mens-soccer/stats/{0}/pdf",
         "conference_schedule_provider": "Boost",
         "conference_base_url": "https://bigten.org",
-        "conference_schedule_url": "https://bigten.org/msoc/schedule/?teamFilter=WIS"
+        "conference_schedule_url": "https://bigten.org/msoc/schedule/?teamFilter=WIS",
+        "article_display_type": "list",
+        "articles_url": "https://uwbadgers.com/sports/mens-soccer/archives?search=&sport=msoc&season=0"
     },
     "Penn State": {
         "name": "Penn State",
         "abbreviation": "PSU",
-        "base_website_type": 3,
-        "hostname": "gopsusports.com",
+        "base_url": "https://gopsusports.com",
         "roster_url": "https://gopsusports.com/sports/mens-soccer/roster?view=table",
         "schedule_url": "https://gopsusports.com/sports/mens-soccer/schedule?view=list",
+        "stats_url": {
+            "2025": "https://gopsusports.com/documents/01234567-0123-0123-0123-012345678912.pdf",
+            "2024": "https://gopsusports.com/documents/01234567-0123-0123-0123-012345678912.pdf",
+            "2023": "https://gopsusports.com/documents/0213d22b-5091-4687-96b4-d3c66ca9f94d.pdf"
+        },
         "conference_schedule_provider": "Boost",
         "conference_base_url": "https://bigten.org",
-        "conference_schedule_url": "https://bigten.org/msoc/schedule/?teamFilter=PSU"
+        "conference_schedule_url": "https://bigten.org/msoc/schedule/?teamFilter=PSU",
+        "article_display_type": "table",
+        "articles_url": "https://gopsusports.com/sports/mens-soccer/news?view=list"
     },
     "UIC": {
         "name": "UIC",
         "abbreviation": "UIC",
-        "base_website_type": 2,
-        "hostname": "uicflames.com",
+        "base_url": "https://uicflames.com",
         "roster_url": "https://uicflames.com/sports/mens-soccer/roster?print=true",
         "schedule_url": "https://uicflames.com/sports/mens-soccer/schedule?print=true",
+        "stats_url": "https://uicflames.com/sports/mens-soccer/stats/{0}/pdf",
         "conference_schedule_provider": "Sidearm",
         "conference_base_url": "https://mvc-sports.com",
-        "conference_schedule_url": "https://mvc-sports.com/calendar.aspx?path=msoc"
+        "conference_schedule_url": "https://mvc-sports.com/calendar.aspx?path=msoc",
+        "article_display_type": "table",
+        "articles_url": "https://uicflames.com/sports/mens-soccer/archives"
     },
     "Loyola Chicago": {
         "name": "Loyola Chicago",
         "abbreviation": "LUC",
-        "base_website_type": 2,
-        "hostname": "loyolaramblers.com",
+        "base_url": "https://loyolaramblers.com",
         "roster_url": "https://loyolaramblers.com/sports/mens-soccer/roster?print=true",
         "schedule_url": "https://loyolaramblers.com/sports/mens-soccer/schedule?print=true",
+        "stats_url": "https://loyolaramblers.com/sports/mens-soccer/stats/{0}/pdf",
         "conference_schedule_provider": "Sidearm",
         "conference_base_url": "https://atlantic10.com",
-        "conference_schedule_url": "https://atlantic10.com/calendar.aspx?path=msoc"
+        "conference_schedule_url": "https://atlantic10.com/calendar.aspx?path=msoc",
+        "article_display_type": "list",
+        "articles_url": "https://loyolaramblers.com/sports/mens-soccer/archives"
     },
     "DePaul": {
         "name": "DePaul",
         "abbreviation": "DPU",
-        "base_website_type": 1,
-        "hostname": "depaulbluedemons.com",
+        "base_url": "https://depaulbluedemons.com",
         "roster_url": "https://depaulbluedemons.com/sports/mens-soccer/roster/print",
         "schedule_url": "https://depaulbluedemons.com/sports/mens-soccer/schedule/print?view=table&print=auto",
+        "stats_url": "https://depaulbluedemons.com/sports/mens-soccer/stats/{0}/pdf",
         "conference_schedule_provider": "Sidearm",
         "conference_base_url": "https://www.bigeast.com",
-        "conference_schedule_url": "https://www.bigeast.com/calendar.aspx?path=msoc"
+        "conference_schedule_url": "https://www.bigeast.com/calendar.aspx?path=msoc",
+        "article_display_type": "table",
+        "articles_url": "https://depaulbluedemons.com/sports/mens-soccer/archives"
     },
     "Northern Illinois": {
         "name": "Northern Illinois",
         "abbreviation": "NIU",
-        "base_website_type": 2,
-        "hostname": "niuhuskies.com",
+        "base_url": "https://niuhuskies.com",
         "roster_url": "https://niuhuskies.com/sports/mens-soccer/roster?print=true",
         "schedule_url": "https://niuhuskies.com/sports/mens-soccer/schedule?print=true",
+        "stats_url": {
+            "2025": "https://niuhuskies.com/documents/2025/8/22/2025_NIU_Men_s_Soccer_Season_Stats.pdf",
+            "2024": "https://niuhuskies.com/documents/2024/8/22/2024_NIU_Men_s_Soccer_Season_Stats.pdf",
+            "2023": "https://niuhuskies.com/documents/2023/10/7/2023_NIU_Men_s_Soccer_Season_Stats.pdf"
+        },
         "conference_schedule_provider": "Sidearm",
         "conference_base_url": "https://mvc-sports.com",
-        "conference_schedule_url": "https://mvc-sports.com/calendar.aspx?path=msoc"
+        "conference_schedule_url": "https://mvc-sports.com/calendar.aspx?path=msoc",
+        "article_display_type": "table",
+        "articles_url": "https://niuhuskies.com/sports/mens-soccer/archives"
+    },
+    "Chicago State": {
+        "name": "Chicago State",
+        "abbreviation": "CSU",
+        "base_url": "https://gocsucougars.com",
+        "roster_url": "https://gocsucougars.com/sports/mens-soccer/roster?print=true",
+        "schedule_url": "https://gocsucougars.com/sports/mens-soccer/schedule?print=true",
+        "stats_url": "https://gocsucougars.com/sports/mens-soccer/stats/{0}/pdf",
+        "conference_schedule_provider": "Sidearm",
+        "conference_base_url": "https://northeastconference.org",
+        "conference_schedule_url": "https://northeastconference.org/calendar.aspx?path=msoc",
+        "article_display_type": "list",
+        "articles_url": "https://www.gocsucougars.com/sports/mens-soccer/archives?sport=msoc"
     }
 }
