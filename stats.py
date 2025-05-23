@@ -18,124 +18,65 @@ def download_stats(team_data: dict[str, str], years: list[int], output_folder_pa
     """
     st.write(f"Downloading {team_data['name']}'s stats...")
 
-    if team_data["name"] == "Penn State":
-        download_penn_state_stats(team_data, output_folder_path)
-    else:
-        download_other_team_stats(team_data, years, output_folder_path)
+    driver = initialize_web_driver()
+
+    pdf_url_in_embed = [
+        "Northwestern",
+        "Indiana",
+        "Ohio State",
+        "UCLA",
+        "Michigan State",
+        "Michigan",
+        "DePaul"
+    ]
+
+    pdf_url_in_object = [
+        "Maryland",
+        "Washington",
+        "Rutgers",
+        "Wisconsin",
+        "Penn State",
+        "UIC",
+        "Loyola",
+        "Northern Illinois",
+        "Chicago State"
+    ]
+
+    for year in years:
+        if (team_data["name"] == "Penn State") or (team_data["name"] == "Northern Illinois"):
+            driver.get(team_data["stats_url"][str(year)])
+            time.sleep(1)
+        else:
+            driver.get(team_data["stats_url"].format(year))
+            time.sleep(1)
+
+        doc = BeautifulSoup(driver.page_source, "lxml")
+
+        output_path = f"{output_folder_path}/{team_data['abbreviation']} {year} Stats.pdf"
+
+        if team_data["name"] in pdf_url_in_embed:
+            embed_tag = doc.find("embed")
+            if embed_tag:
+                download_pdf(embed_tag["src"], output_path)
+                continue
+        elif team_data["name"] in pdf_url_in_object:
+            object_tag = doc.find("object")
+            if object_tag:
+                download_pdf(object_tag["data"], output_path)
+                continue
+
+        st.write(f"Could not find stats for the year {year}, continuing...")
+
+    driver.quit()
 
     st.write(f"Finished downloading {team_data['name']}'s stats!")
 
-def download_penn_state_stats(team_data: dict[str, str], output_folder_path: str) -> None:
-    """
-    Downloads Penn State's stats PDF files.
-
-    Args:
-        team_data (dict[str, str]): Dictionary containing team data.
-        output_folder_path (str): Path to the output folder.
-
-    Returns:
-        None
-    """
-    url = f"https://{team_data['hostname']}/sports/mens-soccer"
-    stats_url = find_penn_state_stats_pdf_url(url)
-
-    response = requests.get(stats_url)
+def download_pdf(pdf_url: str, output_path: str) -> None:
+    response = requests.get(pdf_url)
 
     if response.status_code == 404:
+        st.write(f"{pdf_url} does not link to an existing PDF, continuing...")
         return
 
-    output_path = f"{output_folder_path}/{team_data['abbreviation']} Stats.pdf"
     with open(output_path, 'wb') as file:
         file.write(response.content)
-
-def download_other_team_stats(team_data: dict[str, str], years: list[int], output_folder_path: str) -> None:
-    """
-    Downloads the team's stats PDF files.
-
-    Args:
-        team_data (dict[str, str]): Dictionary containing team data.
-        years (list[int]): Years for which to print stats for.
-        output_folder_path (str): Path to the output folder.
-
-    Returns:
-        None
-    """
-    for year in years:
-        stats_url = construct_stats_url(team_data, year)
-        response = requests.get(stats_url)
-
-        if response.status_code == 404:
-            st.write(f"Unable to find stats for {year} with the following URL: {stats_url}.")
-            st.write("Continuing...")
-            continue
-
-        output_path = f"{output_folder_path}/{team_data['abbreviation']} {year} Stats.pdf"
-        with open(output_path, 'wb') as file:
-            file.write(response.content)
-
-def construct_stats_url(team_data: dict[str, str], year: int) -> str:
-    """
-    Construct a URL to find the stats PDF.
-
-    Args:
-        team_data (dict[str, str]): Dictionary containing team data.
-        year (int): The year in which to generate the URL for.
-
-    Returns:
-        str: The URL for the stats PDF.
-    """
-    base_url = "https://dxbhsrqyrr690.cloudfront.net/sidearm.nextgen.sites" if (team_data["base_website_type"] == 1) else "https://s3.us-east-2.amazonaws.com/sidearm.nextgen.sites"
-    return f"{base_url}/{team_data['hostname']}/stats/msoc/{year}/pdf/cume.pdf"
-
-def find_penn_state_stats_pdf_url(url: str) -> str:
-    """
-    Get the URLs of the stats PDF for Penn State.
-
-    Args:
-        url (str): The base URL of Penn State's Mens Soccer.
-
-    Returns:
-        str: The URL of the stats PDF for Penn State.
-    """
-    driver = initialize_web_driver()
-    driver.get(url)
-    time.sleep(1)
-
-    doc = BeautifulSoup(driver.page_source, "lxml")
-    stats_page_url = extract_penn_state_stats_page_url(doc)
-
-    driver.get(stats_page_url)
-    time.sleep(1)
-
-    doc = BeautifulSoup(driver.page_source, "lxml")
-    stats_pdf_url = extract_stats_pdf_url(doc)
-
-    driver.quit()
-    return stats_pdf_url
-
-def extract_penn_state_stats_page_url(doc: BeautifulSoup) -> str:
-    """
-    Get the URL of the page containing the embedded stats PDF.
-
-    Args:
-        doc (BeautifulSoup): The page content of the base page URL.
-
-    Returns:
-        str: The URL of the page containing the embedded stats PDF.
-    """
-    ul = doc.find("ul", class_="menu menu--level-0 menu--sport")
-    li = ul.find_all("li", class_="menu-item menu-item--static-url menu-item--show-on-mobile menu-item--show-on-desktop menu__item")[5]
-    return li.find("a")["href"]
-
-def extract_stats_pdf_url(doc: BeautifulSoup) -> str:
-    """
-    Get the URL of the stats PDF for Penn State.
-
-    Args:
-        doc (BeautifulSoup): The page content of the page that containing embedded stats PDF.
-
-    Returns:
-        str: The URL of the stats PDF for Penn State.
-    """
-    div = doc.find("div", class_="container pdf-block__container")
-    return div.find("a")["href"]

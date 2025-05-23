@@ -33,7 +33,7 @@ def initialize_web_driver() -> webdriver.Chrome:
     service = Service(executable_path="/usr/local/bin/chromedriver")
 
     chrome_options = Options()
-    chrome_options.add_argument("--headless")
+    # chrome_options.add_argument("--headless")
     chrome_options.add_argument("--log-level=3")
 
     return webdriver.Chrome(service=service, options=chrome_options)

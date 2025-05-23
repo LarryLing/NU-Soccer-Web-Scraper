@@ -44,8 +44,7 @@ def fetch_articles(team_data: dict[str, str], date_range: tuple[dt.date, dt.date
 
 def download_articles(articles: DataFrame, output_folder_path: str) -> None:
     """
-    Downloads selected articles into respective PDF files. Articles whose URLs link to a website that does not share
-    the same hostname will be printed out as a Streamlit DataFrame instance.
+    Downloads selected articles into respective PDF files.
 
     Args:
         articles (DataFrame): DataFrame of articles to download containing the date posted, headline, and URL.
@@ -100,7 +99,7 @@ def scan_table_for_articles(team_data: dict[str, str], table: Tag, date_range: t
     start_date, end_date = date_range
     sanitized_table = sanitize_html(table)
 
-    links = [f"https://{team_data['hostname']}{a['href']}" for a in table.find_all("a") if (a["href"] != "#")]
+    links = [f"{team_data['base_url']}{a['href']}" for a in table.find_all("a") if (a["href"] != "#")]
 
     dataframe = pd.read_html(StringIO(sanitized_table))[0].drop(columns=["Sport", "Category"], errors="ignore")
     dataframe.drop(dataframe.columns[dataframe.columns.str.contains('Unnamed', case=False)], axis=1, inplace=True)
@@ -140,6 +139,6 @@ def scan_ul_for_articles(team_data: dict[str, str], ul: Tag, date_range: tuple[d
 
         if start_date <= date <= end_date:
             a = li.find("a")
-            articles_list.append({"Date": date, "Headline": a.text, "URL": f"https://{team_data['hostname']}{a['href']}"})
+            articles_list.append({"Date": date, "Headline": a.text, "URL": f"{team_data['base_url']}{a['href']}"})
 
     return DataFrame(articles_list)
