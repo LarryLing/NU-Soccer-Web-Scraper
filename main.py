@@ -1,6 +1,9 @@
 import datetime
 import json
+import os
+
 import streamlit as st
+
 from articles import download_articles, fetch_articles
 from box_scores import download_box_scores
 from roster import download_roster
@@ -8,7 +11,10 @@ from schedule import download_schedule
 from stats import download_stats
 
 with open("teams.json", "r") as file:
-    teams: dict[str, dict[str, str]] = json.load(file)
+    teams: dict = json.load(file)
+
+with open("config.json", "r") as file:
+    config: dict = json.load(file)
 
 st.title = "NU Soccer Web Scraper"
 
@@ -47,7 +53,8 @@ if "Stats" in data_to_scrape:
         )
 
         with st.expander("**Disclaimer**"):
-            st.warning("Options for years will be added at the start of every calendar year. However, please be aware that depending on the time of current season, there might not be stats available to download yet.")
+            st.warning(
+                "Options for years will be added at the start of every calendar year. However, please be aware that depending on the time of current season, there might not be stats available to download yet.")
 
 if "Box Scores" in data_to_scrape:
     with st.container(border=True):
@@ -61,7 +68,8 @@ if "Box Scores" in data_to_scrape:
         )
 
         with st.expander("**Disclaimer**"):
-            st.warning("Box scores are downloaded in order from most newest to oldest and only the current season will be searched. If there are not enough box scores available, we will attempt to download as many as possible.")
+            st.warning(
+                "Box scores are downloaded in order from most newest to oldest and only the current season will be searched. If there are not enough box scores available, we will attempt to download as many as possible.")
 
 if "Articles" in data_to_scrape:
     with st.container(border=True):
@@ -76,12 +84,14 @@ if "Articles" in data_to_scrape:
         )
 
 with st.container(border=True):
-    output_folder_path = '/Users/larryling/Desktop/untitled folder'
+    output_folder_path = st.text_input(
+        label="Enter an output folder path:",
+        value=config["output_folder_path"])
 
-    if output_folder_path:
-        st.write(f"_{output_folder_path}_")
+    if os.path.exists(output_folder_path):
+        st.write("Selected output folder:", output_folder_path)
     else:
-        st.write("_No output folder selected._")
+        st.write("Please select a valid output folder.")
 
 scrape_button = st.button(
     label="Download",
@@ -91,14 +101,9 @@ scrape_button = st.button(
 if scrape_button:
     team_data = teams[team_name]
 
-    ## TODO: Add checks for 504 Gateway timeouts.
-
-    ## TODO: Add checks for unable to write to file destination.
-
-    ## TODO: Add checks for SSL handshake error.
     if "Roster" in data_to_scrape:
         output_file = f"{output_folder_path}/{team_data['abbreviation']} Roster.pdf"
-        download_roster(team_data["name"], team_data["roster_url"], output_file)
+        download_roster(team_data["roster_url"], output_file)
 
     if "Schedule" in data_to_scrape:
         output_file = f"{output_folder_path}/{team_data["abbreviation"]} Schedule.pdf"
@@ -112,6 +117,7 @@ if scrape_button:
 
     if "Articles" in data_to_scrape:
         articles = fetch_articles(team_data, date_range)
+
 
         @st.fragment()
         def select_articles():
@@ -147,5 +153,8 @@ if scrape_button:
             if download_articles_button:
                 download_articles(filtered_articles, output_folder_path)
 
+
         if articles is not None:
             select_articles()
+        else:
+            st.write("No articles could be found.")

@@ -1,26 +1,26 @@
-import base64
-import time
 import os
+import time
+from io import StringIO
+
 import pandas as pd
 import streamlit as st
 from bs4 import BeautifulSoup
-from selenium.webdriver.common.print_page_options import PrintOptions
-from utils import initialize_web_driver, sanitize_html
+
+from utils import initialize_web_driver, sanitize_html, print_to_pdf
+
 
 def download_schedule(team_name: str, url: str, output_file_path: str) -> None:
     """
     Downloads the schedule page to a PDF file.
 
     Args:
-        team_name (str): Name of the team.
-        url (str): URL of the site.
-        output_file_path (str): Path to the downloaded PDF file.
+        team_name: Name of the team.
+        url: URL of the site.
+        output_file_path: Path to the downloaded PDF file.
 
     Returns:
         None
     """
-    st.write(f"Downloading {team_name}'s schedule...")
-
     driver = initialize_web_driver()
 
     script = """
@@ -34,71 +34,76 @@ def download_schedule(team_name: str, url: str, output_file_path: str) -> None:
         if (removed) removed.parentNode.removeChild(removed);
     """
 
-    driver.get(url)
-    time.sleep(1)
+    try:
+        driver.get(url)
+        time.sleep(1)
 
-    driver.execute_script(script)
+        driver.execute_script(script)
 
-    scrape_schedule = [
-        "Northwestern",
-        "Indiana",
-        "Ohio State",
-        "UCLA",
-        "Michigan State",
-        "Michigan",
-        "DePaul"
-    ]
+        scrape_schedule = [
+            "Northwestern",
+            "Indiana",
+            "Ohio State",
+            "UCLA",
+            "Michigan State",
+            "Michigan",
+            "DePaul"
+        ]
 
-    if team_name in scrape_schedule:
-        soup = BeautifulSoup(driver.page_source, "lxml")
+        if team_name in scrape_schedule:
+            soup = BeautifulSoup(driver.page_source, "lxml")
 
-        extracted_tables = extract_tables(soup)
+            extracted_tables = extract_tables(soup)
 
-        full_html = build_html_document(soup.find("title").text, extracted_tables)
+            if not extracted_tables:
+                raise ValueError(
+                    f"Could not find tables to extract. This is likely caused by the website's internal server error.  \n{url}")
 
-        with open("temp.html", "w") as f:
-            f.write(full_html)
+            full_html = build_html_document(soup.find("title").text, extracted_tables)
 
-        driver.get(f"file:///{os.getcwd()}/temp.html")
+            with open("temp.html", "w") as f:
+                f.write(full_html)
 
-    print_options = PrintOptions()
-    pdf = driver.print_page(print_options)
-    bytes = base64.b64decode(pdf)
+            driver.get(f"file:///{os.getcwd()}/temp.html")
 
-    with open(output_file_path, "wb") as f:
-        f.write(bytes)
+        print_to_pdf(driver, output_file_path)
+    except Exception as e:
+        st.write(f"**{output_file_path.split('/')[-1]}** Failed!  \nReason: {e}")
+    finally:
+        driver.quit()
 
-    driver.quit()
 
-    st.write(f"Finished downloading {team_name}'s schedule!")
-
-def extract_tables(soup: BeautifulSoup) -> list[str]:
+def extract_tables(soup: BeautifulSoup) -> list[str] | None:
     """
     Extracts and processes tables from the HTML document.
 
     Args:
-        soup (BeautifulSoup): Parsed HTML document.
+        soup: Parsed HTML document.
 
     Returns:
-        list[str]: List of HTML strings containing tables.
+        List of HTML strings containing tables. Returns a None if no tables were found.
     """
-    sanitized_html = sanitize_html(soup)
-    dataframes = pd.read_html(sanitized_html)
-    for dataframe in dataframes:
-        dataframe.fillna("", inplace=True)
+    try:
+        sanitized_html = sanitize_html(soup)
+        dataframes = pd.read_html(StringIO(sanitized_html))
+        for dataframe in dataframes:
+            dataframe.fillna("", inplace=True)
 
-    return [dataframe.to_html(index=False) for dataframe in dataframes]
+        return [dataframe.to_html(index=False) for dataframe in dataframes]
+    except ValueError:
+        return None
+
 
 def build_html_document(title: str, html_tables: list[str]) -> str:
     """
     Initializes a blank HTML page and inserts HTML table content.
 
     Args:
-        title (str): Title for the HTML document.
-        html_tables (list[str]): List of HTML strings containing tables to insert.
+        title: Title for the HTML document.
+        html_tables: List of HTML strings containing tables to insert.
 
     Returns:
-        str: A string representation of the full .HTML document.
+        A string representation of the full .HTML document.
     """
 
     html = f"""
