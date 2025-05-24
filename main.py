@@ -44,14 +44,14 @@ if "Stats" in data_to_scrape:
     with st.container(border=True):
         years = st.multiselect(
             label="Select which year's stats you would like to download:",
-            options=["2025", "2024", "2023"],
-            default=["2025", "2024"],
+            options=["2024", "2023"],
+            default=["2024", "2023"],
             placeholder="ie: 2024"
         )
 
         with st.expander("**Disclaimer**"):
             st.warning(
-                "Options for years will be added at the start of every calendar year. However, please be aware that depending on the time of current season, there might not be stats available to download yet.")
+                "Options for years will be added at the start of every Fall season. However, please be aware that depending on the time of current season, there might not be stats available to download yet.")
 
 if "Box Scores" in data_to_scrape:
     with st.container(border=True):
@@ -66,7 +66,7 @@ if "Box Scores" in data_to_scrape:
 
         with st.expander("**Disclaimer**"):
             st.warning(
-                "Box scores are downloaded in order from most newest to oldest and only the current season will be searched. If there are not enough box scores available, we will attempt to download as many as possible.")
+                "Box scores are downloaded in order from most newest to oldest. Only the current season will be searched. If there are not enough box scores available, we will attempt to download as many as possible.")
 
 if "Articles" in data_to_scrape:
     with st.container(border=True):
