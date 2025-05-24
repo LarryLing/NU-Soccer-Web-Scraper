@@ -25,7 +25,6 @@ def initialize_web_driver() -> webdriver.Chrome:
 
     chrome_options = Options()
     chrome_options.add_argument("--headless")
-    chrome_options.add_argument("--log-level=3")
 
     return webdriver.Chrome(service=service, options=chrome_options)
 
@@ -73,7 +72,7 @@ def print_pdf_to_zipfile(driver: webdriver.Chrome, filename: str, zip_buffer: By
 
         st.write(f"**{filename}** Downloaded!")
     except InvalidArgumentException as e:
-        st.write(f"**{filename}** Failed!  \nReason: {e}")
+        st.write(f"**{filename}** Failed!  \nReason: {e.msg}")
 
 
 def response_pdf_to_zipfile(pdf_url: str, filename: str, zip_buffer: BytesIO) -> None:

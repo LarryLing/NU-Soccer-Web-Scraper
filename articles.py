@@ -47,9 +47,9 @@ def fetch_articles(team_data: dict, date_range: tuple[dt.date, dt.date]) -> Data
             st.write(f"**Fetching Articles** Success!")
             return articles_df
     except TimeoutException as e:
-        st.write(f"**Fetching Articles** Failed!  \nReason: {e}")
+        st.write(f"**Fetching Articles** Failed!  \nReason: {e.msg}")
     except WebDriverException as e:
-        st.write(f"**Fetching Articles** Failed!  \nReason: {e}")
+        st.write(f"**Fetching Articles** Failed!  \nReason: {e.msg}")
     finally:
         driver.quit()
 
@@ -95,7 +95,7 @@ def download_articles(articles: DataFrame, zip_buffer: BytesIO) -> None:
 
             print_pdf_to_zipfile(driver, filename, zip_buffer)
         except TimeoutException as e:
-            st.write(f"**{filename}** Failed!  \nReason: {e}")
+            st.write(f"**{filename}** Failed!  \nReason: {e.msg}")
 
     driver.quit()
 

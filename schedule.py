@@ -70,7 +70,7 @@ def download_schedule(team_name: str, url: str, filename: str, zip_buffer: Bytes
 
         print_pdf_to_zipfile(driver, filename, zip_buffer)
     except WebDriverException as e:
-        st.write(f"**{filename}** Failed!  \nReason: {e}")
+        st.write(f"**{filename}** Failed!  \nReason: {e.msg}")
     finally:
         driver.quit()
 
