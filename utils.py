@@ -25,6 +25,7 @@ def initialize_web_driver() -> webdriver.Chrome:
 
     chrome_options = Options()
     chrome_options.add_argument("--headless")
+    chrome_options.add_argument('--no-sandbox')
 
     return webdriver.Chrome(service=service, options=chrome_options)
 
