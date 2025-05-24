@@ -76,9 +76,9 @@ def print_pdf_to_zipfile(driver: webdriver.Chrome, filename: str, zip_buffer: By
         with zipfile.ZipFile(zip_buffer, "a", zipfile.ZIP_DEFLATED, False) as zip_file:
             zip_file.writestr(filename, pdf_bytes)
 
-        st.write(f"**{filename}** Downloaded!")
+        st.write(f"**{filename}** :white_check_mark:")
     except InvalidArgumentException as e:
-        st.write(f"**{filename}** Failed!  \nReason: {e.msg}")
+        st.write(f"**{filename}** :x:  \nReason: {e.msg}")
 
 
 def response_pdf_to_zipfile(pdf_url: str, filename: str, zip_buffer: BytesIO) -> None:
@@ -96,10 +96,10 @@ def response_pdf_to_zipfile(pdf_url: str, filename: str, zip_buffer: BytesIO) ->
     response = requests.get(pdf_url)
     if response.status_code == 404:
         st.write(
-            f"**{filename}** Failed!  \nReason: Found a PDF URL, but it doesn't link to an existing file.")
+            f"**{filename}** :x:  \nReason: Found a PDF URL, but it doesn't link to an existing file.")
         return
 
     with zipfile.ZipFile(zip_buffer, "a", zipfile.ZIP_DEFLATED, False) as zip_file:
         zip_file.writestr(filename, response.content)
 
-    st.write(f"**{filename}** Downloaded!")
+    st.write(f"**{filename}** :white_check_mark:")

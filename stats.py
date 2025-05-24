@@ -68,12 +68,12 @@ def download_stats(team_data: dict, years: list[int], zip_buffer: BytesIO) -> No
                     response_pdf_to_zipfile(object_tag["data"], filename, zip_buffer)
                     continue
 
-            st.write(f"**{filename}** Failed!  \nReason: Could not find the PDF url.")
+            st.write(f"**{filename}** :x:  \nReason: Could not find the PDF url.")
         except TimeoutException as e:
-            st.write(f"**{filename}** Failed!  \nReason: {e.msg}")
+            st.write(f"**{filename}** :x:  \nReason: {e.msg}")
             continue
         except WebDriverException as e:
-            st.write(f"**{filename}** Failed!  \nReason: {e.msg}")
+            st.write(f"**{filename}** :x:  \nReason: {e.msg}")
             continue
 
     driver.quit()
