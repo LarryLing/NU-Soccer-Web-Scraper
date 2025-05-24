@@ -21,7 +21,7 @@ def initialize_web_driver() -> webdriver.Chrome:
     Returns:
         A new web driver instance.
     """
-    service = Service(ChromeDriverManager(chrome_type=ChromeType.GOOGLE).install())
+    service = Service(ChromeDriverManager(chrome_type=ChromeType.CHROMIUM).install())
 
     chrome_options = Options()
     chrome_options.add_argument("--headless")
