@@ -1,4 +1,6 @@
 import base64
+import zipfile
+from io import BytesIO
 
 import requests
 import streamlit as st
@@ -48,13 +50,40 @@ def sanitize_html(doc: Tag | None) -> str:
     return str(doc)
 
 
-def download_pdf(pdf_url: str, output_file_path: str) -> None:
+def print_pdf_to_zipfile(driver: webdriver.Chrome, filename: str, zip_buffer: BytesIO) -> None:
     """
-    Downloads a PDF file from a HTTP request with.
+    Performs Selenium's print function and saves the PDF bytes to the zip file.
+
+    Args:
+        driver: Selenium webdriver instance.
+        filename: The filename of the PDF file.
+        zip_buffer: The buffer to write the PDF file to.
+
+    Returns:
+        None
+    """
+    try:
+        print(driver.current_url)
+        print_options = PrintOptions()
+        pdf = driver.print_page(print_options)
+        pdf_bytes = base64.b64decode(pdf)
+
+        with zipfile.ZipFile(zip_buffer, "a", zipfile.ZIP_DEFLATED, False) as zip_file:
+            zip_file.writestr(filename, pdf_bytes)
+
+        st.write(f"**{filename}** Downloaded!")
+    except InvalidArgumentException as e:
+        st.write(f"**{filename}** Failed!  \nReason: {e}")
+
+
+def response_pdf_to_zipfile(pdf_url: str, filename: str, zip_buffer: BytesIO) -> None:
+    """
+    Sends an HTTP GET request for PDF bytes and writes them to a zip file.
 
     Args:
         pdf_url: The URL of the PDF file.
-        output_file_path: The path to the output file.
+        filename: The filename of the PDF file.
+        zip_buffer: The buffer to write the PDF file to.
 
     Returns:
         None
@@ -62,34 +91,10 @@ def download_pdf(pdf_url: str, output_file_path: str) -> None:
     response = requests.get(pdf_url)
     if response.status_code == 404:
         st.write(
-            f"**{output_file_path.split('/')[-1]}** Failed!  \nReason: Found a PDF URL, but it doesn't link to an existing file.")
+            f"**{filename}** Failed!  \nReason: Found a PDF URL, but it doesn't link to an existing file.")
         return
 
-    with open(output_file_path, 'wb') as file:
-        file.write(response.content)
+    with zipfile.ZipFile(zip_buffer, "a", zipfile.ZIP_DEFLATED, False) as zip_file:
+        zip_file.writestr(filename, response.content)
 
-    st.write(f"**{output_file_path.split('/')[-1]}** Downloaded!")
-
-
-def print_to_pdf(driver: webdriver.Chrome, output_file_path: str) -> None:
-    """
-    Downloads a PDF file  using Selenium's print function.
-
-    Args:
-        driver: The web driver instance.
-        output_file_path: The path to the output file.
-
-    Returns:
-        None
-    """
-    try:
-        print_options = PrintOptions()
-        pdf = driver.print_page(print_options)
-        pdf_bytes = base64.b64decode(pdf)
-
-        with open(output_file_path, "wb") as f:
-            f.write(pdf_bytes)
-
-        st.write(f"**{output_file_path.split('/')[-1]}** Downloaded!")
-    except InvalidArgumentException as e:
-        st.write(f"**{output_file_path.split('/')[-1]}** Failed!  \nReason: {e}")
+    st.write(f"**{filename}** Downloaded!")

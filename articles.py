@@ -1,6 +1,6 @@
 import datetime as dt
 import time
-from io import StringIO
+from io import StringIO, BytesIO
 
 import pandas as pd
 import streamlit as st
@@ -8,7 +8,7 @@ from bs4 import BeautifulSoup, Tag
 from pandas import DataFrame
 from selenium.common import TimeoutException
 
-from utils import initialize_web_driver, sanitize_html, print_to_pdf
+from utils import initialize_web_driver, sanitize_html, print_pdf_to_zipfile
 
 
 def fetch_articles(team_data: dict, date_range: tuple[dt.date, dt.date]) -> DataFrame | None:
@@ -54,13 +54,13 @@ def fetch_articles(team_data: dict, date_range: tuple[dt.date, dt.date]) -> Data
     return None
 
 
-def download_articles(articles: DataFrame, output_folder_path: str) -> None:
+def download_articles(articles: DataFrame, zip_buffer: BytesIO) -> None:
     """
     Downloads selected articles into respective PDF files.
 
     Args:
         articles: DataFrame of articles to download containing the date posted, headline, and URL.
-        output_folder_path: Path to the output folder.
+        zip_buffer: Bytes buffer containing the roster page.
 
     Returns:
         None
@@ -83,7 +83,7 @@ def download_articles(articles: DataFrame, output_folder_path: str) -> None:
 
     for _, row in articles.iterrows():
         headline = row["Headline"].replace("/", "_")
-        output_file_path = f"{output_folder_path}/{headline}.pdf"
+        filename = f"{headline}.pdf"
 
         try:
             driver.get(row["URL"])
@@ -91,9 +91,9 @@ def download_articles(articles: DataFrame, output_folder_path: str) -> None:
 
             driver.execute_script(script)
 
-            print_to_pdf(driver, output_file_path)
+            print_pdf_to_zipfile(driver, filename, zip_buffer)
         except TimeoutException as e:
-            st.write(f"**{output_file_path.split('/')[-1]}** Failed!  \nReason: {e}")
+            st.write(f"**{filename}** Failed!  \nReason: {e}")
 
     driver.quit()
 

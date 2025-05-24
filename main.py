@@ -1,6 +1,6 @@
 import datetime
+import io
 import json
-import os
 
 import streamlit as st
 
@@ -83,37 +83,28 @@ if "Articles" in data_to_scrape:
             format="MM/DD/YYYY",
         )
 
-with st.container(border=True):
-    output_folder_path = st.text_input(
-        label="Enter an output folder path:",
-        value=config["output_folder_path"])
-
-    if os.path.exists(output_folder_path):
-        st.write("Selected output folder:", output_folder_path)
-    else:
-        st.write("Please select a valid output folder.")
-
 scrape_button = st.button(
-    label="Download",
-    disabled=((not team_name) or (not data_to_scrape) or (not output_folder_path))
+    label="Scrape",
+    disabled=(not team_name) or (not data_to_scrape)
 )
 
 if scrape_button:
     team_data = teams[team_name]
+    zip_buffer = io.BytesIO()
 
     if "Roster" in data_to_scrape:
-        output_file = f"{output_folder_path}/{team_data['abbreviation']} Roster.pdf"
-        download_roster(team_data["roster_url"], output_file)
+        filename = f"{team_data['abbreviation']} Roster.pdf"
+        download_roster(team_data["roster_url"], filename, zip_buffer)
 
     if "Schedule" in data_to_scrape:
-        output_file = f"{output_folder_path}/{team_data["abbreviation"]} Schedule.pdf"
-        download_schedule(team_data["name"], team_data["schedule_url"], output_file)
+        filename = f"{team_data["abbreviation"]} Schedule.pdf"
+        download_schedule(team_data["name"], team_data["schedule_url"], filename, zip_buffer)
 
     if "Box Scores" in data_to_scrape:
-        download_box_scores(team_data, count, output_folder_path)
+        download_box_scores(team_data, count, zip_buffer)
 
     if "Stats" in data_to_scrape:
-        download_stats(team_data, years, output_folder_path)
+        download_stats(team_data, years, zip_buffer)
 
     if "Articles" in data_to_scrape:
         articles = fetch_articles(team_data, date_range)
@@ -151,10 +142,17 @@ if scrape_button:
 
             download_articles_button = st.button("Download Selected Articles")
             if download_articles_button:
-                download_articles(filtered_articles, output_folder_path)
+                download_articles(filtered_articles, zip_buffer)
 
 
         if articles is not None:
             select_articles()
         else:
             st.write("No articles could be found.")
+
+    st.download_button(
+        "Download PDFs",
+        file_name=f"{team_name}.zip",
+        mime="application/zip",
+        data=zip_buffer
+    )
