@@ -1,20 +1,21 @@
 import time
+from io import BytesIO
 
 import streamlit as st
 from bs4 import BeautifulSoup
-from selenium.common import TimeoutException
+from selenium.common import TimeoutException, WebDriverException
 
-from utils import initialize_web_driver, download_pdf
+from utils import initialize_web_driver, response_pdf_to_zipfile
 
 
-def download_stats(team_data: dict, years: list[int], output_folder_path: str) -> None:
+def download_stats(team_data: dict, years: list[int], zip_buffer: BytesIO) -> None:
     """
     Downloads a team's season stats to a PDF file.
 
     Args:
         team_data: Dictionary containing team data.
         years: Years for which to print stats for.
-        output_folder_path: Path to the output folder.
+        zip_buffer: Bytes buffer containing the roster page.
 
     Returns:
         None
@@ -44,7 +45,7 @@ def download_stats(team_data: dict, years: list[int], output_folder_path: str) -
     ]
 
     for year in years:
-        output_file_path = f"{output_folder_path}/{team_data['abbreviation']} {year} Stats.pdf"
+        filename = f"{team_data['abbreviation']} {year} Stats.pdf"
 
         try:
             if (team_data["name"] == "Penn State") or (team_data["name"] == "Northern Illinois"):
@@ -53,23 +54,26 @@ def download_stats(team_data: dict, years: list[int], output_folder_path: str) -
                 driver.get(team_data["stats_url"].format(year))
 
             time.sleep(1)
+
+            doc = BeautifulSoup(driver.page_source, "lxml")
+
+            if team_data["name"] in pdf_url_in_embed:
+                embed_tag = doc.find("embed")
+                if embed_tag:
+                    response_pdf_to_zipfile(embed_tag["src"], filename, zip_buffer)
+                    continue
+            elif team_data["name"] in pdf_url_in_object:
+                object_tag = doc.find("object")
+                if object_tag:
+                    response_pdf_to_zipfile(object_tag["data"], filename, zip_buffer)
+                    continue
+
+            st.write(f"**{filename}** Failed!  \nReason: Could not find the PDF url.")
         except TimeoutException as e:
-            st.write(f"**{output_file_path.split('/')[-1]}** Failed!  \nReason: {e}")
+            st.write(f"**{filename}** Failed!  \nReason: {e.msg}")
             continue
-
-        doc = BeautifulSoup(driver.page_source, "lxml")
-
-        if team_data["name"] in pdf_url_in_embed:
-            embed_tag = doc.find("embed")
-            if embed_tag:
-                download_pdf(embed_tag["src"], output_file_path)
-                continue
-        elif team_data["name"] in pdf_url_in_object:
-            object_tag = doc.find("object")
-            if object_tag:
-                download_pdf(object_tag["data"], output_file_path)
-                continue
-
-        st.write(f"**{output_file_path.split('/')[-1]}** Failed!  \nReason: Could not find the PDF url.")
+        except WebDriverException as e:
+            st.write(f"**{filename}** Failed!  \nReason: {e.msg}")
+            continue
 
     driver.quit()

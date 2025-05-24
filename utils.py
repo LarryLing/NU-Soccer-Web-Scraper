@@ -1,8 +1,6 @@
 import base64
-import json
-import os
-import tkinter as tk
-from tkinter import filedialog
+import zipfile
+from io import BytesIO
 
 import requests
 import streamlit as st
@@ -12,24 +10,8 @@ from selenium.common import InvalidArgumentException
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.common.print_page_options import PrintOptions
-
-
-def select_output_folder() -> str:
-    """
-    Opens the file dialog, allowing users to select an output folder.
-
-    Returns:
-        The full path to the selected folder.
-    """
-    os.environ['TK_SILENCE_DEPRECATION'] = '1'
-
-    root = tk.Tk()
-    root.withdraw()
-    root.attributes('-topmost', True)
-    folder_path = filedialog.askdirectory(parent=root)
-    root.destroy()
-
-    return folder_path
+from webdriver_manager.chrome import ChromeDriverManager
+from webdriver_manager.core.os_manager import ChromeType
 
 
 def initialize_web_driver() -> webdriver.Chrome:
@@ -39,14 +21,16 @@ def initialize_web_driver() -> webdriver.Chrome:
     Returns:
         A new web driver instance.
     """
-    with open("config.json", "r") as file:
-        config: dict[str, str] = json.load(file)
-
-    service = Service(executable_path=config["chrome_driver_executable_path"])
+    service = Service(ChromeDriverManager(chrome_type=ChromeType.CHROMIUM).install())
 
     chrome_options = Options()
     chrome_options.add_argument("--headless")
-    chrome_options.add_argument("--log-level=3")
+    chrome_options.add_argument('--no-sandbox')
+    chrome_options.add_argument("--disable-dev-shm-usage")
+    chrome_options.add_argument("--disable-gpu")
+    chrome_options.add_argument("--disable-extensions")
+    chrome_options.add_argument("--disable-software-rasterizer")
+    chrome_options.add_argument("--single-process")
 
     return webdriver.Chrome(service=service, options=chrome_options)
 
@@ -71,13 +55,40 @@ def sanitize_html(doc: Tag | None) -> str:
     return str(doc)
 
 
-def download_pdf(pdf_url: str, output_file_path: str) -> None:
+def print_pdf_to_zipfile(driver: webdriver.Chrome, filename: str, zip_buffer: BytesIO) -> None:
     """
-    Downloads a PDF file from a HTTP request with.
+    Performs Selenium's print function and saves the PDF bytes to the zip file.
+
+    Args:
+        driver: Selenium webdriver instance.
+        filename: The filename of the PDF file.
+        zip_buffer: The buffer to write the PDF file to.
+
+    Returns:
+        None
+    """
+    try:
+        print(driver.current_url)
+        print_options = PrintOptions()
+        pdf = driver.print_page(print_options)
+        pdf_bytes = base64.b64decode(pdf)
+
+        with zipfile.ZipFile(zip_buffer, "a", zipfile.ZIP_DEFLATED, False) as zip_file:
+            zip_file.writestr(filename, pdf_bytes)
+
+        st.write(f"**{filename}** Downloaded!")
+    except InvalidArgumentException as e:
+        st.write(f"**{filename}** Failed!  \nReason: {e.msg}")
+
+
+def response_pdf_to_zipfile(pdf_url: str, filename: str, zip_buffer: BytesIO) -> None:
+    """
+    Sends an HTTP GET request for PDF bytes and writes them to a zip file.
 
     Args:
         pdf_url: The URL of the PDF file.
-        output_file_path: The path to the output file.
+        filename: The filename of the PDF file.
+        zip_buffer: The buffer to write the PDF file to.
 
     Returns:
         None
@@ -85,34 +96,10 @@ def download_pdf(pdf_url: str, output_file_path: str) -> None:
     response = requests.get(pdf_url)
     if response.status_code == 404:
         st.write(
-            f"**{output_file_path.split('/')[-1]}** Failed!  \nReason: Found a PDF URL, but it doesn't link to an existing file.")
+            f"**{filename}** Failed!  \nReason: Found a PDF URL, but it doesn't link to an existing file.")
         return
 
-    with open(output_file_path, 'wb') as file:
-        file.write(response.content)
+    with zipfile.ZipFile(zip_buffer, "a", zipfile.ZIP_DEFLATED, False) as zip_file:
+        zip_file.writestr(filename, response.content)
 
-    st.write(f"**{output_file_path.split('/')[-1]}** Downloaded!")
-
-
-def print_to_pdf(driver: webdriver.Chrome, output_file_path: str) -> None:
-    """
-    Downloads a PDF file  using Selenium's print function.
-
-    Args:
-        driver: The web driver instance.
-        output_file_path: The path to the output file.
-
-    Returns:
-        None
-    """
-    try:
-        print_options = PrintOptions()
-        pdf = driver.print_page(print_options)
-        pdf_bytes = base64.b64decode(pdf)
-
-        with open(output_file_path, "wb") as f:
-            f.write(pdf_bytes)
-
-        st.write(f"**{output_file_path.split('/')[-1]}** Downloaded!")
-    except InvalidArgumentException as e:
-        st.write(f"**{output_file_path.split('/')[-1]}** Failed!  \nReason: {e}")
+    st.write(f"**{filename}** Downloaded!")

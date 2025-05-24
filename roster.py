@@ -1,18 +1,20 @@
 import time
+from io import BytesIO
 
 import streamlit as st
-from selenium.common import TimeoutException
+from selenium.common import TimeoutException, WebDriverException
 
-from utils import initialize_web_driver, print_to_pdf
+from utils import initialize_web_driver, print_pdf_to_zipfile
 
 
-def download_roster(url: str, output_file_path: str) -> None:
+def download_roster(url: str, filename: str, zip_buffer: BytesIO) -> None:
     """
     Downloads the roster page to a PDF file.
 
     Args:
         url: URL of the site.
-        output_file_path: Path to the downloaded PDF file.
+        filename: Name of the downloaded file.
+        zip_buffer: Bytes buffer containing the roster page.
 
     Returns:
         None
@@ -36,8 +38,10 @@ def download_roster(url: str, output_file_path: str) -> None:
 
         driver.execute_script(script)
 
-        print_to_pdf(driver, output_file_path)
+        print_pdf_to_zipfile(driver, filename, zip_buffer)
     except TimeoutException as e:
-        st.write(f"**{output_file_path.split('/')[-1]}** Failed!  \nReason: {e}")
+        st.write(f"**{filename}** Failed!  \nReason: {e.msg}")
+    except WebDriverException as e:
+        st.write(f"**{filename}** Failed!  \nReason: {e.msg}")
     finally:
         driver.quit()

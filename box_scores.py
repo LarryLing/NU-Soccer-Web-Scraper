@@ -1,20 +1,21 @@
 import time
+from io import BytesIO
 
 import streamlit as st
 from bs4 import BeautifulSoup
 from selenium import webdriver
-from selenium.common import TimeoutException, ElementNotVisibleException
+from selenium.common import TimeoutException, ElementNotVisibleException, WebDriverException
 
-from utils import initialize_web_driver, download_pdf
+from utils import initialize_web_driver, response_pdf_to_zipfile
 
 
-def download_box_scores(team_data: dict, count: int, output_folder_path: str) -> None:
+def download_box_scores(team_data: dict, count: int, zip_buffer: BytesIO) -> None:
     """Downloads box scores into respective PDF files.
 
     Args:
         team_data: Dictionary containing team data.
         count: The number of box scores to print.
-        output_folder_path: Path to the output folder.
+        zip_buffer: Bytes buffer containing box scores.
 
     Returns:
         None
@@ -33,9 +34,8 @@ def download_box_scores(team_data: dict, count: int, output_folder_path: str) ->
 
             for box_score_pdf_url in box_score_pdf_urls:
                 filename = box_score_pdf_url.split("/")[-1]
-                output_file_path = f"{output_folder_path}/{filename}"
 
-                download_pdf(box_score_pdf_url, output_file_path)
+                response_pdf_to_zipfile(box_score_pdf_url, filename, zip_buffer)
         elif team_data["conference_schedule_provider"] == "Sidearm":
             schedule_url = f"{team_data['conference_base_url']}/calendar.aspx?path=msoc"
 
@@ -47,11 +47,12 @@ def download_box_scores(team_data: dict, count: int, output_folder_path: str) ->
 
             for home_team, away_team, date, box_score_pdf_url in box_score_pdf_urls:
                 filename = f"{home_team} vs {away_team} {date}.pdf"
-                output_file_path = f"{output_folder_path}/{filename}"
 
-                download_pdf(box_score_pdf_url, output_file_path)
+                response_pdf_to_zipfile(box_score_pdf_url, filename, zip_buffer)
     except TimeoutException as e:
         st.write(e)
+    except WebDriverException as e:
+        st.write(f"**Locating Box Scores** Failed!  \nReason: {e.msg}")
     finally:
         driver.quit()
 
@@ -190,8 +191,8 @@ def fetch_pdf_urls_for_matches(driver: webdriver.Chrome, matches: list[tuple[str
 
             match_data.append((match[0], match[1], match[2], box_score_pdf_url))
         except TimeoutException as e:
-            st.write(f"**{match[0]} vs. {match[1]} {match[2]}.pdf** Failed!  \nReason: {e}")
+            st.write(f"**{match[0]} vs. {match[1]} {match[2]}.pdf** Failed!  \nReason: {e.msg}")
         except ElementNotVisibleException as e:
-            st.write(f"**{match[0]} vs. {match[1]} {match[2]}.pdf** Failed!  \nReason: {e}")
+            st.write(f"**{match[0]} vs. {match[1]} {match[2]}.pdf** Failed!  \nReason: {e.msg}")
 
     return match_data

@@ -5,3 +5,4 @@ lxml
 pdfkit
 requests
 pandas
+webdriver-manager
