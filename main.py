@@ -13,9 +13,6 @@ from stats import download_stats
 with open("teams.json", "r") as file:
     teams: dict = json.load(file)
 
-with open("config.json", "r") as file:
-    config: dict = json.load(file)
-
 st.title = "NU Soccer Web Scraper"
 
 team_name = st.selectbox(
