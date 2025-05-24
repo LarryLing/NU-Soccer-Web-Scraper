@@ -88,7 +88,6 @@ scrape_button = st.button(
 if scrape_button:
     team_data = teams[team_name]
     zip_buffer = io.BytesIO()
-    articles_option_selected = False
 
     if "Roster" in data_to_scrape:
         filename = f"{team_data['abbreviation']} Roster.pdf"
@@ -106,10 +105,9 @@ if scrape_button:
 
     if "Articles" in data_to_scrape:
         articles = fetch_articles(team_data, date_range)
-        articles_option_selected = True
 
 
-        @st.fragment()
+        @st.fragment
         def select_articles():
             column_configuration = {
                 "Date": st.column_config.DatetimeColumn(
@@ -126,6 +124,9 @@ if scrape_button:
                 "URL": None
             }
 
+            if "submitted" not in st.session_state:
+                st.session_state.submitted = False
+
             st.write("Select which articles you would like to download:")
 
             all_articles = st.dataframe(
@@ -141,21 +142,26 @@ if scrape_button:
 
             if st.button("Download Selected Articles"):
                 download_articles(filtered_articles, zip_buffer)
-                st.session_state.download_ready = True
+                st.session_state.submitted = True
+
+            if st.session_state.submitted:
+                st.download_button(
+                    "Download PDFs",
+                    file_name=f"{team_name}.zip",
+                    mime="application/zip",
+                    data=zip_buffer
+                )
+
+                del st.session_state.submitted
 
         if articles is not None:
             select_articles()
         else:
             st.write("No articles could be found.")
-            articles_option_selected = False
-
-    if not articles_option_selected or (articles_option_selected and st.session_state.get("download_ready", False)):
+    else:
         st.download_button(
             "Download PDFs",
             file_name=f"{team_name}.zip",
             mime="application/zip",
             data=zip_buffer
         )
-
-        if "download_ready" in st.session_state:
-            del st.session_state.download_ready
