@@ -1,5 +1,4 @@
 import base64
-import json
 import os
 import tkinter as tk
 from tkinter import filedialog
@@ -12,7 +11,8 @@ from selenium.common import InvalidArgumentException
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.common.print_page_options import PrintOptions
-
+from webdriver_manager.chrome import ChromeDriverManager
+from webdriver_manager.core.os_manager import ChromeType
 
 def select_output_folder() -> str:
     """
@@ -39,10 +39,7 @@ def initialize_web_driver() -> webdriver.Chrome:
     Returns:
         A new web driver instance.
     """
-    with open("config.json", "r") as file:
-        config: dict[str, str] = json.load(file)
-
-    service = Service(executable_path=config["chrome_driver_executable_path"])
+    service = Service(ChromeDriverManager(chrome_type=ChromeType.CHROMIUM).install())
 
     chrome_options = Options()
     chrome_options.add_argument("--headless")
