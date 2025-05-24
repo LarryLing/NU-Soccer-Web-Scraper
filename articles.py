@@ -6,7 +6,7 @@ import pandas as pd
 import streamlit as st
 from bs4 import BeautifulSoup, Tag
 from pandas import DataFrame
-from selenium.common import TimeoutException
+from selenium.common import TimeoutException, WebDriverException
 
 from utils import initialize_web_driver, sanitize_html, print_pdf_to_zipfile
 
@@ -47,6 +47,8 @@ def fetch_articles(team_data: dict, date_range: tuple[dt.date, dt.date]) -> Data
             st.write(f"**Fetching Articles** Success!")
             return articles_df
     except TimeoutException as e:
+        st.write(f"**Fetching Articles** Failed!  \nReason: {e}")
+    except WebDriverException as e:
         st.write(f"**Fetching Articles** Failed!  \nReason: {e}")
     finally:
         driver.quit()

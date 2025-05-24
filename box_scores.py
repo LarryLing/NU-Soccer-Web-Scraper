@@ -4,7 +4,7 @@ from io import BytesIO
 import streamlit as st
 from bs4 import BeautifulSoup
 from selenium import webdriver
-from selenium.common import TimeoutException, ElementNotVisibleException
+from selenium.common import TimeoutException, ElementNotVisibleException, WebDriverException
 
 from utils import initialize_web_driver, response_pdf_to_zipfile
 
@@ -51,6 +51,8 @@ def download_box_scores(team_data: dict, count: int, zip_buffer: BytesIO) -> Non
                 response_pdf_to_zipfile(box_score_pdf_url, filename, zip_buffer)
     except TimeoutException as e:
         st.write(e)
+    except WebDriverException as e:
+        st.write(f"**Locating Box Scores** Failed!  \nReason: {e}")
     finally:
         driver.quit()
 

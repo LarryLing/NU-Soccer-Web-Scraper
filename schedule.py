@@ -5,6 +5,7 @@ from io import StringIO, BytesIO
 import pandas as pd
 import streamlit as st
 from bs4 import BeautifulSoup
+from selenium.common import WebDriverException
 
 from utils import initialize_web_driver, sanitize_html, print_pdf_to_zipfile
 
@@ -68,7 +69,7 @@ def download_schedule(team_name: str, url: str, filename: str, zip_buffer: Bytes
             driver.get(f"file:///{os.getcwd()}/temp.html")
 
         print_pdf_to_zipfile(driver, filename, zip_buffer)
-    except Exception as e:
+    except WebDriverException as e:
         st.write(f"**{filename}** Failed!  \nReason: {e}")
     finally:
         driver.quit()

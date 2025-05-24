@@ -3,7 +3,7 @@ from io import BytesIO
 
 import streamlit as st
 from bs4 import BeautifulSoup
-from selenium.common import TimeoutException
+from selenium.common import TimeoutException, WebDriverException
 
 from utils import initialize_web_driver, response_pdf_to_zipfile
 
@@ -55,6 +55,9 @@ def download_stats(team_data: dict, years: list[int], zip_buffer: BytesIO) -> No
 
             time.sleep(1)
         except TimeoutException as e:
+            st.write(f"**{filename}** Failed!  \nReason: {e}")
+            continue
+        except WebDriverException as e:
             st.write(f"**{filename}** Failed!  \nReason: {e}")
             continue
 
