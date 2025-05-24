@@ -11,7 +11,6 @@ from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.common.print_page_options import PrintOptions
 from webdriver_manager.chrome import ChromeDriverManager
-from webdriver_manager.core.os_manager import ChromeType
 
 
 def initialize_web_driver() -> webdriver.Chrome:
@@ -21,7 +20,7 @@ def initialize_web_driver() -> webdriver.Chrome:
     Returns:
         A new web driver instance.
     """
-    service = Service(ChromeDriverManager(chrome_type=ChromeType.CHROMIUM).install())
+    service = Service(ChromeDriverManager().install())
 
     chrome_options = Options()
     chrome_options.add_argument("--headless")
