@@ -1,7 +1,4 @@
 import base64
-import os
-import tkinter as tk
-from tkinter import filedialog
 
 import requests
 import streamlit as st
@@ -13,23 +10,6 @@ from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.common.print_page_options import PrintOptions
 from webdriver_manager.chrome import ChromeDriverManager
 from webdriver_manager.core.os_manager import ChromeType
-
-def select_output_folder() -> str:
-    """
-    Opens the file dialog, allowing users to select an output folder.
-
-    Returns:
-        The full path to the selected folder.
-    """
-    os.environ['TK_SILENCE_DEPRECATION'] = '1'
-
-    root = tk.Tk()
-    root.withdraw()
-    root.attributes('-topmost', True)
-    folder_path = filedialog.askdirectory(parent=root)
-    root.destroy()
-
-    return folder_path
 
 
 def initialize_web_driver() -> webdriver.Chrome:
