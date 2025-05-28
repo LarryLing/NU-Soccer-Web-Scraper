@@ -74,11 +74,7 @@ def get_boost_box_score_pdf_urls(doc: BeautifulSoup, team_abbreviation: str, cou
     for table_row in schedule_table.find("tbody").find_all("tr"):
         table_cells = table_row.find_all("td")
 
-        st.write(f"{table_cells[2].text} vs. {table_cells[4].text}")
-        st.write(team_abbreviation)
-        st.write(team_abbreviation)
-
-        if (team_abbreviation not in table_cells[2].text) or (team_abbreviation not in table_cells[4].text):
+        if (team_abbreviation != table_cells[2].text) and (team_abbreviation != table_cells[4].text):
             continue
 
         box_score_pdf_urls.append(table_row.find("a", string="Box Score").get("href"))
