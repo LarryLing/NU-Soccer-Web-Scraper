@@ -77,7 +77,9 @@ def get_boost_box_score_pdf_urls(doc: BeautifulSoup, team_abbreviation: str, cou
         if (team_abbreviation != table_cells[2].text) and (team_abbreviation != table_cells[4].text):
             continue
 
-        box_score_pdf_urls.append(table_row.find("a", string="Box Score").get("href"))
+        anchor = table_row.find("a", string="Box Score")
+        if anchor:
+            box_score_pdf_urls.append(anchor["href"])
 
     count = min(len(box_score_pdf_urls), count)
     return box_score_pdf_urls[-count:]
@@ -125,8 +127,11 @@ def extract_matches(team_data: dict, match_tables: list) -> list[tuple[str, str,
                 continue
 
             date = extract_match_date(match_table)
-            box_score_href = team_data["conference_base_url"] + tr.find("a", string="Box Score")["href"]
-            matches.append((home_team, away_team, date, box_score_href))
+
+            anchor = tr.find("a", string="Box Score")
+            if anchor:
+                box_score_href = team_data["conference_base_url"] + anchor["href"]
+                matches.append((home_team, away_team, date, box_score_href))
 
     return matches
 
