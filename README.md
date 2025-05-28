@@ -83,4 +83,4 @@ pip install -r requirements.txt
 
 ## License
 
-[MIT](https://choosealicense.com/licenses/mit/)
+[MIT](https://github.com/LarryLing/NU-Soccer-Web-Scraper/blob/readme/LICENSE)
