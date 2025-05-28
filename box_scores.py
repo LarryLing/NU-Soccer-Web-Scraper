@@ -70,7 +70,7 @@ def get_boost_box_score_pdf_urls(doc: BeautifulSoup, team_name: str, count: int)
     """
     box_score_pdf_urls = []
     schedule_table = doc.find("table")
-    for table_row in schedule_table.find("thead").find_all("tr"):
+    for table_row in schedule_table.find("tbody").find_all("tr"):
         st.write(table_row.get_text())
         if team_name in table_row.get_text():
             box_score_pdf_urls.append(table_row.find("a", string="Box Score").get("href"))
