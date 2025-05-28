@@ -73,6 +73,8 @@ def get_boost_box_score_pdf_urls(doc: BeautifulSoup, team_name: str, count: int)
     for table_row in schedule_table.find("tbody").find_all("tr"):
         table_cells = table_row.find_all("td")
 
+        st.write(f"{table_cells[2].text} vs. {table_cells[4].text}")
+
         if (team_name not in table_cells[2].text) or (team_name not in table_cells[4].text):
             continue
 
