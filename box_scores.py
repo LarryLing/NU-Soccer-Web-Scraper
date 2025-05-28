@@ -27,7 +27,7 @@ def download_box_scores(team_data: dict, count: int, zip_buffer: BytesIO) -> Non
             schedule_url = f"{team_data['conference_base_url']}/msoc/schedule/?teamFilter={team_data['abbreviation']}"
 
             driver.get(schedule_url)
-            time.sleep(1)
+            time.sleep(2)
             doc = BeautifulSoup(driver.page_source, "lxml")
 
             box_score_pdf_urls = get_boost_box_score_pdf_urls(doc, count)
@@ -40,7 +40,7 @@ def download_box_scores(team_data: dict, count: int, zip_buffer: BytesIO) -> Non
             schedule_url = f"{team_data['conference_base_url']}/calendar.aspx?path=msoc"
 
             driver.get(schedule_url)
-            time.sleep(1)
+            time.sleep(2)
             doc = BeautifulSoup(driver.page_source, "lxml")
 
             box_score_pdf_urls = get_sidearm_match_data(driver, team_data, doc, count)
