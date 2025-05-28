@@ -2,7 +2,7 @@
 
 A web scraper designed to extract and organize Northwestern University soccer team data from official team websites.
 
-### [Vist the deployed app here.](https://nu-soccer.streamlit.app)
+### [Visit the deployed app here.](https://nu-soccer.streamlit.app)
 
 ## Usage
 
