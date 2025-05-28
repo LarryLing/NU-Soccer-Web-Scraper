@@ -71,10 +71,12 @@ def get_boost_box_score_pdf_urls(doc: BeautifulSoup, team_name: str, count: int)
     box_score_pdf_urls = []
     schedule_table = doc.find("table")
     for table_row in schedule_table.find("tbody").find_all("tr"):
-        st.write(table_row.get_text())
-        if team_name in table_row.get_text():
-            box_score_pdf_urls.append(table_row.find("a", string="Box Score").get("href"))
-    # box_score_pdf_urls = [a["href"] for a in schedule_table.find_all("a", string="Box Score")]
+        table_cells = table_row.find_all("td")
+
+        if (team_name not in table_cells[2].text) or (team_name not in table_cells[4].text):
+            continue
+
+        box_score_pdf_urls.append(table_row.find("a", string="Box Score").get("href"))
 
     count = min(len(box_score_pdf_urls), count)
     return box_score_pdf_urls[-count:]
