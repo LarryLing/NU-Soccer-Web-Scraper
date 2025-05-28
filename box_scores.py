@@ -27,10 +27,10 @@ def download_box_scores(team_data: dict, count: int, zip_buffer: BytesIO) -> Non
             schedule_url = f"{team_data['conference_base_url']}/msoc/schedule/?teamFilter={team_data['abbreviation']}"
 
             driver.get(schedule_url)
-            time.sleep(2)
+            time.sleep(1)
             doc = BeautifulSoup(driver.page_source, "lxml")
 
-            box_score_pdf_urls = get_boost_box_score_pdf_urls(doc, count)
+            box_score_pdf_urls = get_boost_box_score_pdf_urls(doc, team_data["name"], count)
 
             for box_score_pdf_url in box_score_pdf_urls:
                 filename = box_score_pdf_url.split("/")[-1]
@@ -40,7 +40,7 @@ def download_box_scores(team_data: dict, count: int, zip_buffer: BytesIO) -> Non
             schedule_url = f"{team_data['conference_base_url']}/calendar.aspx?path=msoc"
 
             driver.get(schedule_url)
-            time.sleep(2)
+            time.sleep(1)
             doc = BeautifulSoup(driver.page_source, "lxml")
 
             box_score_pdf_urls = get_sidearm_match_data(driver, team_data, doc, count)
@@ -57,7 +57,7 @@ def download_box_scores(team_data: dict, count: int, zip_buffer: BytesIO) -> Non
         driver.quit()
 
 
-def get_boost_box_score_pdf_urls(doc: BeautifulSoup, count: int) -> list[str]:
+def get_boost_box_score_pdf_urls(doc: BeautifulSoup, team_name: str, count: int) -> list[str]:
     """
     Get the URLs of the box scores from the conference websites provided by Boost.
 
@@ -68,8 +68,12 @@ def get_boost_box_score_pdf_urls(doc: BeautifulSoup, count: int) -> list[str]:
     Returns:
         List of box score PDF URLs.
     """
+    box_score_pdf_urls = []
     schedule_table = doc.find("table")
-    box_score_pdf_urls = [a["href"] for a in schedule_table.find_all("a", string="Box Score")]
+    for table_row in schedule_table.find_all("tr"):
+        if team_name in table_row.get_text():
+            box_score_pdf_urls.append(table_row.find("a", string="Box Score").get("href"))
+    # box_score_pdf_urls = [a["href"] for a in schedule_table.find_all("a", string="Box Score")]
 
     count = min(len(box_score_pdf_urls), count)
     return box_score_pdf_urls[-count:]
